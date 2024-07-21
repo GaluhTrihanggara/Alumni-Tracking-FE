@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const navigate = useNavigate();
 
   const handlePasswordTypeChange = () => {
     setIsPasswordVisible((prev) => !prev);
@@ -12,10 +13,12 @@ export default function LoginForm() {
 
   const submit = (e) => {
     e.preventDefault();
-
     // Fetch /login
     console.log("Form Submit", username, password);
+    // Simulasi login sukses
+    navigate('/beranda');
   };
+
   return (
     <form
       onSubmit={submit}
@@ -67,7 +70,6 @@ export default function LoginForm() {
             className="mt-px text-2xl text-black/100 outline-none border-none flex flex-col items-start w-full"
             required
           />
-
           {isPasswordVisible ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"

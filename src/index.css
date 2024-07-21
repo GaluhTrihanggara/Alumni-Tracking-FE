@@ -32,23 +32,64 @@ body {
 	line-height: 1;
 }
 
-ol, ul {
-	list-style: none;
+.bg-cover {
+	background-size: cover;
 }
 
-blockquote, q {
-	quotes: none;
+.bg-center {
+	background-position: center;
 }
 
-blockquote:before, blockquote:after,
-q:before, q:after {
-	content: '';
-	content: none;
+.h-screen {
+	height: 100vh;
 }
-table {
-	border-collapse: collapse;
-	border-spacing: 0;
+
+/* Tambahkan ini jika tidak menggunakan Tailwind CSS */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff; /* Warna putih */
+  padding: 0.5rem 1rem; /* Sesuaikan padding untuk mengecilkan navbar */
 }
-/* * {
-  outline: 1px solid tomato;
-} */
+
+.img-fluid {
+  max-width: 20%; /* Sesuaikan ukuran gambar */
+  height: auto;
+}
+
+.logo-brand {
+  max-height: 50px; /* Sesuaikan ukuran logo */
+}
+
+.container-xl {
+  max-width: 1300px; /* Sesuaikan ukuran container */
+  width: 100%;
+  margin: 0 auto;
+}
+
+.bg-dark {
+  background-color: #343a40;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.profile-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #6366f1;
+  /* Indigo color, you can change this */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.profile-initial {
+  text-transform: uppercase;
+}
