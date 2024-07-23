@@ -4,16 +4,15 @@ const Sidebar = () => {
   const menuItems = [
     { name: 'Home', icon: '🏠', path: '/beranda' },
     { name: 'Profile', icon: '👤', path: '/profile' },
-    { name: 'Change Password', icon: '🔑', path: '/change-password' },
-    { name: 'Notification', icon: '🔔', path: '/notifications' },
-    { name: 'Privacy', icon: '🔒', path: '/privacy' },
+    { name: 'Change Password', icon: '🔑', path: '/change_password' },
+    { name: 'Privacy Policy', icon: '🔒', path: '/privacy_policy' },
     { name: 'Logout', icon: '🚪', path: '/' },
   ];
 
   return (
     <div className="w-60 bg-gray-800 text-white h-screen fixed left-0 top-0">
       <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4">Menu</h2>
+        <h2 className="text-2xl font-bold mb-4 mt-2">Menu</h2>
         <ul>
           {menuItems.map((item, index) => (
             <li key={index} className="mb-2">
