@@ -224,7 +224,7 @@ const EditProfilePage = () => {
                       name="tahun_masuk"
                       value={profile.tahun_masuk}
                       onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-indigo-200 focus:ring-opacity-50"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     >
                       {Array.from({ length: 2030 - 1999 }, (_, i) => 2030 - i).map(
                         (year) => (
