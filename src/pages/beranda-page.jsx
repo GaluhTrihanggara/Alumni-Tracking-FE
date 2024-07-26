@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backgroundImage from '../assets/Kampus.jpg';
 import logo1 from '../assets/UEU.png';
-import logo2 from '../assets/alumni_tracking.png';
+import logo2 from '../assets/alumni_tracking1.png';
 import profileImage from '../assets/user.jpg';
 
 function Beranda() {
@@ -63,9 +63,19 @@ function Beranda() {
     navigate('/profile');
   };
 
+  const handleKolaborasiAlumni = (e) => {
+    e.preventDefault();
+    navigate('/kolaborasi');
+  };
+
   const handleChangePassword = (e) => {
     e.preventDefault();
     navigate('/change_password');
+  };
+
+  const hanclePrivacyPolicy = (e) =>{
+    e.preventDefault();
+    navigate('/privacy_policy')
   }
 
   const handleSearchChange = (e) => {
@@ -81,6 +91,18 @@ function Beranda() {
     } else {
       setSuggestions([]);
     }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchTerm(suggestion);
+    navigate(`/search?q=${encodeURIComponent(suggestion)}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
   };
 
   return (
@@ -127,13 +149,13 @@ function Beranda() {
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
                 Profile
               </a>
+              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleKolaborasiAlumni}> 
+                Kolaborasi Alumni
+              </a>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
                 Change Password
               </a>
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
-                Notification
-              </a>
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={hanclePrivacyPolicy}>
                 Privacy Policy
               </a>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleLogout}>
@@ -150,7 +172,7 @@ function Beranda() {
           <h2 className="text-5xl font-bold">Semudah Mungkin</h2>
         </div>
         <div className="flex flex-col justify-center items-center w-full">
-          <div className="bg-white w-2/5 rounded-2xl shadow-md relative overflow-hidden">
+          <form onSubmit={handleSearch} className="bg-white w-2/5 rounded-2xl shadow-md relative overflow-hidden">
             <div className="flex flex-row items-center px-5 py-3 border-b border-gray-200">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -166,7 +188,11 @@ function Beranda() {
             {suggestions.length > 0 && (
               <div className="max-h-60 overflow-y-auto">
                 {suggestions.map((suggestion, index) => (
-                  <div key={index} className="px-5 py-3 hover:bg-gray-100 cursor-pointer flex items-center">
+                  <div 
+                    key={index} 
+                    className="px-5 py-3 hover:bg-gray-100 cursor-pointer flex items-center"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -175,7 +201,7 @@ function Beranda() {
                 ))}
               </div>
             )}
-          </div>
+          </form>
         </div>
       </div>
     </div>

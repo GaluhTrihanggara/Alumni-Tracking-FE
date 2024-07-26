@@ -29,7 +29,7 @@ export default function LoginForm() {
           <div className="grid items-center grid-rows-2 mx-auto gap-y-4">
             <div className="text-4xl font-bold text-center">Login</div>
             <div className="w-full text-xl text-black/60">
-              Please login or signup to continue using Alumni Tracking Esa
+              Please login or signup to continue using Alumni Tracking  Universitas Esa
               Unggul
             </div>
           </div>
