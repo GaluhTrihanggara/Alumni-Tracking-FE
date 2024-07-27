@@ -2,11 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Bell, User, Edit, Send, X } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
-import profileImage from '../assets/user.jpg';
-import logo1 from "../assets/alumni_tracking1.png";
+import profileImage from '../../assets/user.jpg';
+import logo1 from "../../assets/alumni_tracking1.png";
 import { FaLinkedin, FaTwitter, FaFacebook } from 'react-icons/fa';
-import Swal from 'sweetalert2';
-import 'sweetalert2/src/sweetalert2.scss'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const KolaborasiAlumniPage = () => {
   const menuRef = useRef(null);
@@ -29,6 +29,22 @@ const KolaborasiAlumniPage = () => {
     twitter: "",
     facebook: ""
   });
+
+  const initialAlumniData = {
+    name: "",
+    studentId: "",
+    major: "",
+    phone: "",
+    gender: "",
+    faculty: "",
+    degree: "",
+    entryYear: "",
+    currentJob: "",
+    company: "",
+    linkedin: "",
+    twitter: "",
+    facebook: ""
+  };
 
   const majors = ["Industrial Engineering", "Computer Science", "Electrical Engineering", "Mechanical Engineering"];
   const genders = ["Laki-Laki", "Perempuan"];
@@ -65,9 +81,21 @@ const KolaborasiAlumniPage = () => {
     setIsMenuOpen(prevState => !prevState);
   };
 
+  const handleBellClick = () => {
+    toast.info('Data alumni sudah terbaru tanggal 12 Februari 2024', {
+      position: "top-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('user');
-    navigate('/');
+    navigate('/login');
   };
 
   const handleProfile = () => {
@@ -87,35 +115,44 @@ const KolaborasiAlumniPage = () => {
   };
 
   const handleSend = () => {
-    console.log("Sending data:", alumniData);
-    setIsEditMode(false);
-    Swal.fire({
-      title: 'Sukses!',
-      text: 'Data sudah dikirim dan menunggu persetujuan dari admin.',
-      icon: 'success',
-      timer: 3000,
-      timerProgressBar: true,
-      showConfirmButton: false
-    });
+    const requiredFields = [
+      'name', 'studentId', 'major', 'phone', 'gender', 
+      'faculty', 'degree', 'entryYear', 'currentJob', 'company'
+    ];
+
+    const isAnyFieldEmpty = requiredFields.some(field => !alumniData[field].trim());
+
+    if (isAnyFieldEmpty) {
+      toast.error('Data harus diisi terlebih dahulu.', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } else {
+      console.log("Sending data:", alumniData);
+      setIsEditMode(false);
+      toast.success('Data sudah dikirim dan menunggu persetujuan dari admin.', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      
+      // Reset the form data to initial state
+      setAlumniData(initialAlumniData);
+    }
   };
 
   const handleCancel = () => {
     setIsEditMode(false);
-    setAlumniData({
-      name: "",
-      studentId: "",
-      major: "",
-      phone: "",
-      gender: "",
-      faculty: "",
-      degree: "",
-      entryYear: "",
-      currentJob: "",
-      company: "",
-      linkedin: "",
-      twitter: "",
-      facebook: ""
-    });
+    setAlumniData(initialAlumniData);
   };
 
   const handleInputChange = (e) => {
@@ -128,12 +165,17 @@ const KolaborasiAlumniPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <ToastContainer/>
       <header className="bg-blue-500 p-4 flex justify-between items-center">
         <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
           <img src={logo1} alt="Alumni Tracking Logo" className="h-8 mr-2" />
         </div>
         <div className="flex items-center">
-          <Bell className="text-white mr-8" size={24} />
+          <Bell 
+          className="text-white mr-6 cursor-pointer" 
+          size={24} 
+          onClick={handleBellClick} // Add this onClick handler
+        />
           <div 
             ref={profileRef}
             className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"
@@ -231,11 +273,12 @@ const KolaborasiAlumniPage = () => {
               />
               <InfoField label="Pekerjaan Saat Ini" value={alumniData.currentJob} name="currentJob" isEditMode={isEditMode} onChange={handleInputChange} />
               <InfoField label="Nama Perusahaan" value={alumniData.company} name="company" isEditMode={isEditMode} onChange={handleInputChange} />
-              <div className="col-span-2">
+                <div className="col-span-2">
                 <SocialMediaField label="LinkedIn" value={alumniData.linkedin} name="linkedin" isEditMode={isEditMode} onChange={handleInputChange} icon={<FaLinkedin />} />
                 <SocialMediaField label="Twitter" value={alumniData.twitter} name="twitter" isEditMode={isEditMode} onChange={handleInputChange} icon={<FaTwitter />} />
                 <SocialMediaField label="Facebook" value={alumniData.facebook} name="facebook" isEditMode={isEditMode} onChange={handleInputChange} icon={<FaFacebook />} />
-              </div>
+                </div>
+              
             </div>
           </div>
         </div>

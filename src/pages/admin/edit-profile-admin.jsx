@@ -1,7 +1,9 @@
 import { useState } from "react";
-import Sidebar from "../components/sidebar";
+import Sidebar from "../../components/adminSidebar";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const EditProfilePage = () => {
+const EditProfileAdminPage = () => {
   const [profile, setProfile] = useState({
     nama: "Thomas Hardison",
     nomor_induk_mahasiswa: "20190801128",
@@ -53,11 +55,19 @@ const EditProfilePage = () => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Profile updated:", profile);
-    alert("Data berhasil disimpan");
-    setIsEditing(false);
-  };
+  e.preventDefault();
+  console.log("Profile updated:", profile);
+  toast.success("Data berhasil disimpan", {
+    position: "top-center",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  });
+  setIsEditing(false);
+};
 
   const handleCancel = () => {
     setIsEditing(false);
@@ -71,6 +81,7 @@ const EditProfilePage = () => {
     <div className="flex">
       <Sidebar />
       <div className="flex-1 ml-64 p-8">
+        <ToastContainer />
         <h1 className="text-2xl font-bold mb-4">My Profile</h1>
         <div className="bg-white shadow-md rounded-lg p-6">
           {isEditing ? (
@@ -435,4 +446,4 @@ const EditProfilePage = () => {
   );
 };
 
-export default EditProfilePage;
+export default EditProfileAdminPage;

@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Bell, User } from "lucide-react";
-import logo1 from "../assets/alumni_tracking1.png";
+import logo1 from "../../assets/alumni_tracking1.png";
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
-import profileImage from '../assets/user.jpg';
+import profileImage from '../../assets/user.jpg';
 import { MdFilterListAlt } from "react-icons/md";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AlumniSearchPage() {
   const menuRef = useRef(null);
@@ -140,9 +142,21 @@ function AlumniSearchPage() {
     setIsMenuOpen(prevState => !prevState);
   };
 
+  const handleBellClick = () => {
+    toast.info('Data alumni sudah terbaru tanggal 12 Februari 2024', {
+      position: "top-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('user');
-    navigate('/');
+    navigate('/login');
   };
 
   const handleProfile = (e) => {
@@ -188,6 +202,7 @@ function AlumniSearchPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
+      <ToastContainer />
       <header className="bg-blue-500 p-4 flex justify-between items-center">
         <div
           className="flex items-center cursor-pointer"
@@ -211,7 +226,11 @@ function AlumniSearchPage() {
           </div>
         </div>
         <div className="flex items-center">
-          <Bell className="text-white mr-8" size={24} />
+          <Bell 
+          className="text-white mr-6 cursor-pointer" 
+          size={24} 
+          onClick={handleBellClick} // Add this onClick handler
+        />
           <div 
             ref={profileRef}
             className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"

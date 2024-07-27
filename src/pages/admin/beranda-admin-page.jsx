@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import backgroundImage from '../assets/Kampus.jpg';
-import logo1 from '../assets/UEU.png';
-import logo2 from '../assets/alumni_tracking1.png';
-import profileImage from '../assets/user.jpg';
+import backgroundImage from '../../assets/Kampus.jpg';
+import logo1 from '../../assets/UEU.png';
+import logo2 from '../../assets/alumni_tracking1.png';
+import profileImage from '../../assets/user.jpg';
+import { Bell } from "lucide-react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-function Beranda() {
+function BerandaAdmin() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -53,24 +56,31 @@ function Beranda() {
     setIsMenuOpen(prevState => !prevState);
   };
 
+  const handleBellClick = () => {
+    toast.info('Data alumni sudah terbaru tanggal 12 Februari 2024', {
+      position: "top-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('user');
-    navigate('/');
+    navigate('/login-admin');
   };
 
   const handleProfile = (e) => {
     e.preventDefault();
-    navigate('/profile');
-  };
-
-  const handleKolaborasiAlumni = (e) => {
-    e.preventDefault();
-    navigate('/kolaborasi');
+    navigate('/admin-profile');
   };
 
   const handleChangePassword = (e) => {
     e.preventDefault();
-    navigate('/change_password');
+    navigate('/admin-password');
   };
 
   const hanclePrivacyPolicy = (e) =>{
@@ -96,17 +106,18 @@ function Beranda() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm) {
-      navigate(`/search?q=${encodeURIComponent(searchTerm)}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
+      navigate(`/admin-search?q=${encodeURIComponent(searchTerm)}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
     }
   };
 
   const handleSuggestionClick = (suggestion) => {
     setSearchTerm(suggestion);
-    navigate(`/search?q=${encodeURIComponent(suggestion)}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
+    navigate(`/admin-search?q=${encodeURIComponent(suggestion)}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
   };
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
+      <ToastContainer />
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
@@ -128,6 +139,11 @@ function Beranda() {
       </nav>
       
       <div className="relative z-20 flex justify-end pr-10 pt-5">
+        <Bell 
+          className="text-white mr-6 mt-2 cursor-pointer" 
+          size={24} 
+          onClick={handleBellClick} // Add this onClick handler
+        />
         <span className="text-white mr-4 mt-2 font-bold text-sm font-sans">
           Halo, Galuh Trihanggara
         </span>
@@ -148,9 +164,6 @@ function Beranda() {
               </div>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
                 Profile
-              </a>
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleKolaborasiAlumni}> 
-                Kolaborasi Alumni
               </a>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
                 Change Password
@@ -208,4 +221,4 @@ function Beranda() {
   );
 }
 
-export default Beranda;
+export default BerandaAdmin;

@@ -1,20 +1,26 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Login from "./pages/login-page";
-import Signup from "./pages/signup-page";
-import Beranda from "./pages/beranda-page";
-import Profile from "./pages/edit-profile-page";
-import ChangePassword from "./pages/change-password";
-import PrivacyPolicy from "./pages/privacy-page";
-import Search from "./pages/search-page";
-import Alumni from "./pages/alumni-page";
-import Kolaborasi from "./pages/kolaborasi-alumni-page";
+import Login from "./pages/user/login-page";
+import Signup from "./pages/user/signup-page";
+import Beranda from "./pages/user/beranda-page";
+import Profile from "./pages/user/edit-profile-page";
+import ChangePassword from "./pages/user/change-password";
+import PrivacyPolicy from "./pages/user/privacy-page";
+import Search from "./pages/user/search-page";
+import Alumni from "./pages/user/alumni-page";
+import Kolaborasi from "./pages/user/kolaborasi-alumni-page";
+import AdminLogin from "./pages/admin/admin-login-page";
+import AdminSearch from "./pages/admin/admin-search-page";
+import DataAlumniPage from "./pages/admin/alumni-page-admin";
+import BerandaAdmin from "./pages/admin/beranda-admin-page";
+import AdminChangePassword from "./pages/admin/change-password-admin";
+import EditProfileAdmin from "./pages/admin/edit-profile-admin";
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/beranda" element={<Beranda />} />
           <Route path="/profile" element={<Profile />} />
@@ -23,6 +29,12 @@ function App() {
           <Route path="/privacy_policy" element={<PrivacyPolicy />} />
           <Route path="/search" element={<Search />} />
           <Route path="/alumni/:nameSlug" element={<Alumni/>} />
+          <Route path="/login-admin" element={<AdminLogin />} />
+          <Route path="/beranda-admin" element={<BerandaAdmin />} />
+          <Route path="/admin-search" element={<AdminSearch />} />
+          <Route path="/admin/alumni/:nameSlug" element={<DataAlumniPage/>} />
+          <Route path="/admin-password" element={<AdminChangePassword />} />
+          <Route path="/admin-profile" element={<EditProfileAdmin />} />
         </Routes>
       </BrowserRouter>
     </div>

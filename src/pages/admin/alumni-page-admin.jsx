@@ -2,11 +2,11 @@ import PropTypes from 'prop-types';
 import { useState, useRef, useEffect } from 'react';
 import { Bell, User } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import profileImage from '../assets/user.jpg';
-import logo1 from "../assets/alumni_tracking1.png";
+import profileImage from '../../assets/user.jpg';
+import logo1 from "../../assets/alumni_tracking1.png";
 import { FaLinkedin, FaTwitter, FaFacebook } from 'react-icons/fa';
 
-const AlumniPage = () => {
+const AlumniPageAdmin = () => {
   const location = useLocation();
   const menuRef = useRef(null);
   const { nameSlug } = useParams();
@@ -31,7 +31,7 @@ const AlumniPage = () => {
   };
 
   const handleLogoClick = () => {
-    navigate('/beranda');
+    navigate('/beranda-admin');
   };
   
   useEffect(() => {
@@ -62,22 +62,17 @@ const AlumniPage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    navigate('/');
-  };
-
-  const handleKolaborasiAlumni = (e) => {
-    e.preventDefault();
-    navigate('/kolaborasi');
+    navigate('/login-admin');
   };
 
   const handleProfile = (e) => {
     e.preventDefault();
-    navigate('/profile');
+    navigate('/admin-profile');
   };
 
   const handleChangePassword = (e) => {
     e.preventDefault();
-    navigate('/change_password');
+    navigate('/admin-password');
   };
 
   const hanclePrivacyPolicy = (e) => {
@@ -114,9 +109,6 @@ const AlumniPage = () => {
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
                   Profile
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleKolaborasiAlumni}> 
-                Kolaborasi Alumni
-              </a>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
                   Change Password
                 </a>
@@ -199,4 +191,4 @@ SocialLink.propTypes = {
   icon: PropTypes.node.isRequired
 };
 
-export default AlumniPage;
+export default AlumniPageAdmin;

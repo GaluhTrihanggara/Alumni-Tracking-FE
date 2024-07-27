@@ -1,7 +1,9 @@
 import { useState } from "react";
-import Sidebar from "../components/sidebar";
+import Sidebar from "../../components/sidebar";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const ChangePasswordPage = () => {
+const ChangePasswordAdminPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -9,19 +11,35 @@ const ChangePasswordPage = () => {
   const [showPasswords, setShowPasswords] = useState(false);
 
   const handleChangePassword = (e) => {
-    e.preventDefault();
-    if (newPassword !== confirmNewPassword) {
-      alert("Password baru dan konfirmasi password tidak cocok.");
-      return;
-    }
-    // Here you can add your logic to handle password change
-    console.log("Password changed:", { currentPassword, newPassword });
-    alert("Password berhasil diubah.");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmNewPassword("");
-    setIsEditing(false);
-  };
+  e.preventDefault();
+  if (newPassword !== confirmNewPassword) {
+    toast.error("Password baru dan konfirmasi password tidak cocok.", {
+      position: "top-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+    return;
+  }
+  // Here you can add your logic to handle password change
+  console.log("Password changed:", { currentPassword, newPassword });
+  toast.success("Password berhasil diubah.", {
+    position: "top-center",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  });
+  setCurrentPassword("");
+  setNewPassword("");
+  setConfirmNewPassword("");
+  setIsEditing(false);
+};
 
   const handleCancel = () => {
     setIsEditing(false);
@@ -42,6 +60,7 @@ const ChangePasswordPage = () => {
     <div className="flex">
       <Sidebar />
       <div className="flex-1 ml-64 p-8">
+        <ToastContainer />
         <h1 className="text-2xl font-bold mb-4">Change Password</h1>
         <div className="bg-white shadow-md rounded-lg p-6">
           {isEditing ? (
@@ -172,4 +191,4 @@ const ChangePasswordPage = () => {
   );
 };
 
-export default ChangePasswordPage;
+export default ChangePasswordAdminPage;

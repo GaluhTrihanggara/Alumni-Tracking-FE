@@ -1,6 +1,6 @@
-import LoginForm from "../components/login-form";
+import SignupForm from "../../components/signup-form";
 
-function Loginpage() {
+function Signup() {
   return (
     <div className="overflow-hidden bg-white flex flex-row justify-between pr-40 w-screen h-screen">
       <div className="bg-[#4a41ae] flex flex-col justify-end pt-5 w-1/2 items-start">
@@ -25,9 +25,9 @@ function Loginpage() {
           className="ml-[93%]"
           style={{ width: "180px" }}
         />
-        <LoginForm />
+        <SignupForm />
       </div>
     </div>
   );
 }
-export default Loginpage;
+export default Signup;
