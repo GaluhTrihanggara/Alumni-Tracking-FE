@@ -22,7 +22,8 @@ function AlumniSearchPage() {
   const [fromYear, setFromYear] = useState("");
   const [toYear, setToYear] = useState("");
   const navigate = useNavigate();
-
+  const lastToastTime = useRef(0);
+  const [newSubmissionsCount, setNewSubmissionsCount] = useState(0);
   const dummyAlumni = [
     {
       id: 1,
@@ -137,21 +138,46 @@ function AlumniSearchPage() {
     }
   }, []);
 
+  useEffect(() => {
+    // Load the submission count from localStorage
+    const storedCount = localStorage.getItem('submissionsCount');
+    setNewSubmissionsCount(storedCount ? parseInt(storedCount, 10) : 0);
+  }, []);
+
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
     setIsMenuOpen(prevState => !prevState);
   };
 
   const handleBellClick = () => {
-    toast.info('Data alumni sudah terbaru tanggal 12 Februari 2024', {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    const now = Date.now();
+    const timeSinceLastToast = now - lastToastTime.current;
+
+    // Only show toast if it's been more than 3 seconds since the last one
+    if (timeSinceLastToast >= 3000) {
+      if (newSubmissionsCount > 0) {
+        toast.info(`Pending ${newSubmissionsCount} data pengajuan`, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      } else {
+        toast.info('Tidak ada data pengajuan', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+      lastToastTime.current = now;
+    }
   };
 
   const handleLogout = () => {
@@ -168,6 +194,11 @@ function AlumniSearchPage() {
     e.preventDefault();
     navigate('/admin-password');
   };
+
+  const handleSubmission = (e) => {
+    e.preventDefault();
+    navigate('/submission');
+  }
 
   const hanclePrivacyPolicy = (e) => {
     e.preventDefault();
@@ -221,11 +252,18 @@ function AlumniSearchPage() {
           </div>
         </div>
         <div className="flex items-center">
+          <div className="relative">
           <Bell 
-          className="text-white mr-6 cursor-pointer" 
+          className="text-white mr-8 mt-1 cursor-pointer" 
           size={24} 
           onClick={handleBellClick} // Add this onClick handler
         />
+        {newSubmissionsCount > 0 && (
+            <div className="absolute bottom-3.5 right-3 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+              {newSubmissionsCount}
+            </div>
+          )}
+        </div>
           <div 
             ref={profileRef}
             className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"
@@ -247,6 +285,9 @@ function AlumniSearchPage() {
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
                   Change Password
                 </a>
+                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleSubmission}>
+                Submissions 
+              </a>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={hanclePrivacyPolicy}>
                   Privacy Policy
                 </a>

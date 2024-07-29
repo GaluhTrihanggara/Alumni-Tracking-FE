@@ -15,6 +15,8 @@ function BerandaAdmin() {
   const profileRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [newSubmissionsCount, setNewSubmissionsCount] = useState(0); // Example count of new submissions
+  const lastToastTime = useRef(0);
 
   // Daftar alumni (contoh)
   const alumniList = [
@@ -51,21 +53,46 @@ function BerandaAdmin() {
     }
   }, []);
 
+   useEffect(() => {
+    // Load the submission count from localStorage
+    const storedCount = localStorage.getItem('submissionsCount');
+    setNewSubmissionsCount(storedCount ? parseInt(storedCount, 10) : 0);
+  }, []);
+
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
     setIsMenuOpen(prevState => !prevState);
   };
 
-  const handleBellClick = () => {
-    toast.info('Data alumni sudah terbaru tanggal 12 Februari 2024', {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+ const handleBellClick = () => {
+    const now = Date.now();
+    const timeSinceLastToast = now - lastToastTime.current;
+
+    // Only show toast if it's been more than 3 seconds since the last one
+    if (timeSinceLastToast >= 3000) {
+      if (newSubmissionsCount > 0) {
+        toast.info(`Pending ${newSubmissionsCount} data pengajuan`, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      } else {
+        toast.info('Tidak ada data pengajuan', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+      lastToastTime.current = now;
+    }
   };
 
   const handleLogout = () => {
@@ -77,6 +104,13 @@ function BerandaAdmin() {
     e.preventDefault();
     navigate('/admin-profile');
   };
+
+  const handleSubmission = (e) => {
+    e.preventDefault();
+    // Reset the new submissions count when navigating to the submission page
+    setNewSubmissionsCount(0);
+    navigate('/submission');
+  }
 
   const handleChangePassword = (e) => {
     e.preventDefault();
@@ -139,11 +173,18 @@ function BerandaAdmin() {
       </nav>
       
       <div className="relative z-20 flex justify-end pr-10 pt-5">
-        <Bell 
-          className="text-white mr-6 mt-2 cursor-pointer" 
-          size={24} 
-          onClick={handleBellClick} // Add this onClick handler
-        />
+        <div className="relative">
+          <Bell 
+            className="text-white mr-8 mt-2 cursor-pointer" 
+            size={24} 
+            onClick={handleBellClick} 
+          />
+          {newSubmissionsCount > 0 && (
+            <div className="absolute top-0 right-3 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+              {newSubmissionsCount}
+            </div>
+          )}
+        </div>
         <span className="text-white mr-4 mt-2 font-bold text-sm font-sans">
           Halo, Galuh Trihanggara
         </span>
@@ -163,10 +204,13 @@ function BerandaAdmin() {
                 <span>Galuh Trihanggara</span>
               </div>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
-                Profile
+                Profile Admin
               </a>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
                 Change Password
+              </a>
+              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleSubmission}>
+                Submissions 
               </a>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={hanclePrivacyPolicy}>
                 Privacy Policy

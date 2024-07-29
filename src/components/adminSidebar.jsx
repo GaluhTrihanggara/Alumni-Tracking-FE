@@ -1,16 +1,18 @@
 import { Link } from 'react-router-dom';
+import submission from '../assets/submission.png';
 
 const Sidebar = () => {
   const menuItems = [
     { name: 'Home', icon: '🏠', path: '/beranda-admin' },
-    { name: 'Profile', icon: '👤', path: '/admin-profile' },
+    { name: 'Profile Admin', icon: '👤', path: '/admin-profile' },
     { name: 'Change Password', icon: '🔑', path: '/admin-password' },
-    { name: 'Privacy Policy', icon: '🔒', path: '/privacy_policy' },
+     { name: 'Submissions', icon: <img src={submission} alt="Pengajuan" className="w-5 h-5" />, path: '/submission' },
+    { name: 'Privacy Policy', icon: '🔒', path: '/privacy-policy' },
     { name: 'Logout', icon: '🚪', path: '/login-admin' },
   ];
 
   return (
-    <div className="w-60 bg-gray-900 text-white h-screen fixed left-0 top-0">
+    <div className="w-60 bg-blue-800 text-white h-screen fixed left-0 top-0">
       <div className="p-4">
         <h2 className="text-2xl font-bold mb-4 mt-2">Menu</h2>
         <ul>

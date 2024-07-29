@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { MdEmail } from "react-icons/md";
+import { MdLock } from "react-icons/md";
 
 export default function SignupForm() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const navigate = useNavigate();
@@ -14,11 +16,11 @@ export default function SignupForm() {
   const submit = (e) => {
     e.preventDefault();
 
-    // Fetch /login or other signup logic here
-    console.log("Form Submit", username, password);
-
+    // Fetch /login
+    console.log("Form Submit", email, password);
+  
     // Redirect to login page
-    navigate("/login");
+    navigate("/login-admin");
   };
 
   return (
@@ -44,19 +46,14 @@ export default function SignupForm() {
           </div>
         </div>
         <div className="flex flex-col items-start w-full gap-2">
-          <div className="text-2xl font-semibold">Username</div>
+          <div className="text-2xl font-semibold">Email</div>
           <div className="flex flex-row items-start w-full h-12 gap-6 px-5 pt-2 bg-white rounded-lg">
-            <img
-              src="https://file.rendit.io/n/PCHtQZzS3hx7Nan1k04r.svg"
-              alt="Profile"
-              id="Profile"
-              className="w-6 mt-px"
-            />
+            <MdEmail className="w-8 h-8 mt-px" />
             <input
               type="text"
-              placeholder="Username/NIM"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="mt-px text-2xl text-black/100 outline-none border-none flex flex-col items-start w-full"
               required
             />
@@ -66,11 +63,7 @@ export default function SignupForm() {
       <div className="flex flex-col items-start w-full gap-2">
         <div className="text-2xl font-semibold">Password</div>
         <div className="relative flex flex-row items-start w-full h-12 gap-6 px-5 pt-2 bg-white rounded-lg">
-          <img
-            src="https://file.rendit.io/n/b3SmrM6zu2moH29qMHm7.svg"
-            alt="IconlyLightOutlineLock"
-            className="w-6 mt-px"
-          />
+          <MdLock className="w-8 h-8 mt-px" />
           <input
             placeholder="Password"
             value={password}
@@ -130,7 +123,7 @@ export default function SignupForm() {
           <div className="text-center text-2xl text-[#2e2e2e]">
             Doesn’t have account yet?{" "}
             <span className="text-2xl font-semibold text-[rgba(6,_1,_255,_0.6)]">
-              <Link to="/login">Login</Link>
+              <Link to="/">Login</Link>
             </span>
           </div>
         </div>

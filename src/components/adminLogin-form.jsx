@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function LoginForm() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function LoginForm() {
   const submit = (e) => {
     e.preventDefault();
     // Fetch /login
-    console.log("Form Submit", username, password);
+    console.log("Form Submit", email, password);
     // Simulasi login sukses
     navigate('/beranda-admin');
   };
@@ -27,7 +27,7 @@ export default function LoginForm() {
       <div className="flex flex-col items-start w-full gap-6">
         <div className="flex flex-col items-start w-full gap-6">
           <div className="grid items-center grid-rows-2 mx-auto gap-y-4">
-            <div className="text-4xl font-bold text-center">Login</div>
+            <div className="text-4xl font-bold text-center">Login Admin</div>
             <div className="w-full text-xl text-black/60">
               Please login or signup to continue using Alumni Tracking  Universitas Esa
               Unggul
@@ -35,7 +35,7 @@ export default function LoginForm() {
           </div>
         </div>
         <div className="flex flex-col items-start w-full gap-2">
-          <div className="text-2xl font-semibold">Username</div>
+          <div className="text-2xl font-semibold">Email</div>
           <div className="flex flex-row items-start w-full h-12 gap-6 px-5 pt-2 bg-white rounded-lg">
             <img
               src="https://file.rendit.io/n/PCHtQZzS3hx7Nan1k04r.svg"
@@ -45,9 +45,9 @@ export default function LoginForm() {
             />
             <input
               type="text"
-              placeholder="Username/NIM"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="mt-px text-2xl text-black/100 outline-none border-none flex flex-col items-start w-full"
               required
             />
@@ -120,7 +120,7 @@ export default function LoginForm() {
           <div className="text-center text-2xl text-[#2e2e2e]">
             Doesn’t have account yet?{" "}
             <span className="text-2xl font-semibold text-[rgba(6,_1,_255,_0.6)]">
-              <Link to="/signup">Sign Up</Link>
+              <Link to="/signup-admin">Sign Up</Link>
             </span>
           </div>
         </div>
