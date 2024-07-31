@@ -1,4 +1,3 @@
-// profile-page.jsx
 import { useState, useEffect } from "react";
 import Sidebar from "../../components/sidebar";
 import { ToastContainer, toast } from "react-toastify";
@@ -8,11 +7,13 @@ const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [programStudis, setProgramStudis] = useState([]);
+  const [mediaSosialPlatforms, setMediaSosialPlatforms] = useState([]);
   const [tempMediaSosial, setTempMediaSosial] = useState([]);
 
   useEffect(() => {
     fetchProfile();
     fetchProgramStudis();
+    fetchMediaSosialPlatforms();
   }, []);
 
   const fetchProfile = async () => {
@@ -56,6 +57,21 @@ const ProfilePage = () => {
     }
   };
 
+  const fetchMediaSosialPlatforms = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/media-sosial", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setMediaSosialPlatforms(data);
+    } catch (error) {
+      console.error("Error fetching media sosial platforms:", error);
+    }
+  };
+
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
@@ -71,7 +87,7 @@ const ProfilePage = () => {
 
   const addMediaSosial = () => {
     if (tempMediaSosial.length < 5) {
-      setTempMediaSosial([...tempMediaSosial, { platform: "", link: "" }]);
+      setTempMediaSosial([...tempMediaSosial, { media_sosial_id: "", link: "" }]);
     } else {
       toast.error("Anda hanya dapat menambahkan maksimal 5 media sosial.");
     }
@@ -84,7 +100,6 @@ const ProfilePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Profile updated:", profile);
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:3000/api/auth/profile", {
@@ -95,7 +110,7 @@ const ProfilePage = () => {
         },
         body: JSON.stringify({
           ...profile,
-          program_studi_id: profile.program_studi_id,
+          Media_Sosial_Alumnis: tempMediaSosial,
         }),
       });
 
@@ -191,12 +206,12 @@ const ProfilePage = () => {
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     >
                       <option value="">Pilih Program Studi</option>
-                     {programStudis.map((ps) => (
-                    <option key={ps.id} value={ps.id}>
-                      {ps.name}
-                    </option>
-                  ))}
-                </select>
+                      {programStudis.map((ps) => (
+                        <option key={ps.id} value={ps.id}>
+                          {ps.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
@@ -341,22 +356,22 @@ const ProfilePage = () => {
                   {tempMediaSosial.map((media, index) => (
                     <div key={index} className="flex space-x-2 mt-2">
                       <select
-                        value={media.platform}
+                        value={media.media_sosial_id}
                         onChange={(e) =>
                           handleMediaSosialChange(
                             index,
-                            "platform",
+                            "media_sosial_id",
                             e.target.value
                           )
                         }
                         className="mt-1 block w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                       >
                         <option value="">Pilih Platform</option>
-                        <option value="LinkedIn">LinkedIn</option>
-                        <option value="Instagram">Instagram</option>
-                        <option value="Twitter">Twitter</option>
-                        <option value="Youtube">Youtube</option>
-                        <option value="Facebook">Facebook</option>
+                        {mediaSosialPlatforms.map((platform) => (
+                          <option key={platform.id} value={platform.id}>
+                            {platform.name}
+                          </option>
+                        ))}
                       </select>
                       <input
                         type="text"
@@ -495,7 +510,7 @@ const ProfilePage = () => {
                   profile.Media_Sosial_Alumnis.map((media, index) => (
                     <div key={index} className="mt-2">
                       <p>
-                        {media.platform}:{" "}
+                        {media.Media_Sosial.name}:{" "}
                         <a
                           href={media.link}
                           target="_blank"
