@@ -87,7 +87,10 @@ const ProfilePage = () => {
 
   const addMediaSosial = () => {
     if (tempMediaSosial.length < 5) {
-      setTempMediaSosial([...tempMediaSosial, { media_sosial_id: "", link: "" }]);
+      setTempMediaSosial([
+        ...tempMediaSosial,
+        { media_sosial_id: "", link: "" },
+      ]);
     } else {
       toast.error("Anda hanya dapat menambahkan maksimal 5 media sosial.");
     }
@@ -231,18 +234,6 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Password
-                    </label>
-                    <input
-                      type="text"
-                      name="password"
-                      value={profile.password}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
                       Jenis Kelamin
                     </label>
                     <div className="mt-2">
@@ -270,8 +261,6 @@ const ProfilePage = () => {
                       </label>
                     </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Perguruan Tinggi
@@ -284,6 +273,8 @@ const ProfilePage = () => {
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     />
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Jenjang
@@ -304,8 +295,6 @@ const ProfilePage = () => {
                       <option value="Diploma-4">Diploma-4</option>
                     </select>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Tahun Masuk
@@ -326,6 +315,8 @@ const ProfilePage = () => {
                       ))}
                     </select>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Pekerjaan Saat Ini
@@ -338,18 +329,18 @@ const ProfilePage = () => {
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     />
                   </div>
-                </div>
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Nama Perusahaan
-                  </label>
-                  <input
-                    type="text"
-                    name="nama_perusahaan"
-                    value={profile.nama_perusahaan}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Nama Perusahaan
+                    </label>
+                    <input
+                      type="text"
+                      name="nama_perusahaan"
+                      value={profile.nama_perusahaan}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    />
+                  </div>
                 </div>
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700">
@@ -446,7 +437,11 @@ const ProfilePage = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Program Studi
                   </label>
-                  <p>{profile.Program_Studi ? profile.Program_Studi.name : "Belum diisi"}</p>
+                  <p>
+                    {profile.Program_Studi
+                      ? profile.Program_Studi.name
+                      : "Belum diisi"}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -458,50 +453,44 @@ const ProfilePage = () => {
               <div className="grid grid-cols-2 gap-4 mt-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Password
-                  </label>
-                  <p>{profile.password}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
                     Jenis Kelamin
                   </label>
                   <p>{profile.jenis_kelamin}</p>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mt-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Perguruan Tinggi
                   </label>
                   <p>{profile.perguruan_tinggi}</p>
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Jenjang
                   </label>
                   <p>{profile.jenjang}</p>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mt-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Tahun Masuk
                   </label>
                   <p>{profile.tahun_masuk}</p>
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Pekerjaan Saat Ini
                   </label>
                   <p>{profile.pekerjaan_saat_ini}</p>
                 </div>
-              </div>
-              <div className="mt-5">
-                <label className="block text-sm font-medium text-gray-700">
-                  Nama Perusahaan
-                </label>
-                <p>{profile.nama_perusahaan}</p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Nama Perusahaan
+                  </label>
+                  <p>{profile.nama_perusahaan}</p>
+                </div>
               </div>
               <div className="mt-5">
                 <label className="block text-sm font-medium text-gray-700">
