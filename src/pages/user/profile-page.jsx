@@ -110,6 +110,7 @@ const ProfilePage = () => {
         },
         body: JSON.stringify({
           ...profile,
+          program_studi_id: profile.program_studi_id,
           Media_Sosial_Alumnis: tempMediaSosial,
         }),
       });
@@ -118,6 +119,7 @@ const ProfilePage = () => {
 
       if (response.ok) {
         setProfile(data);
+        setTempMediaSosial(data.Media_Sosial_Alumnis || []);
         toast.success("Data berhasil disimpan", {
           position: "top-center",
           autoClose: 3000,
