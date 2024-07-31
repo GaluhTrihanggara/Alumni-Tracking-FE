@@ -1,7 +1,9 @@
+// signup-form-page.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function SignupForm() {
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -11,14 +13,30 @@ export default function SignupForm() {
     setIsPasswordVisible((prev) => !prev);
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nama: name, nomor_induk_mahasiswa: username, password: password, program_studi_id: 1 }) // Sesuaikan dengan data yang diperlukan
+      });
 
-    // Fetch /login or other signup logic here
-    console.log("Form Submit", username, password);
+      const data = await response.json();
 
-    // Redirect to login page
-    navigate("/login");
+      if (response.ok) {
+        // Simulasi signup sukses
+        console.log("Signup successful:", data);
+        navigate('/login');
+      } else {
+        console.error("Signup failed:", data);
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error("Error during signup:", error);
+    }
   };
 
   return (
@@ -36,8 +54,10 @@ export default function SignupForm() {
           <div className="text-2xl font-semibold">Name</div>
           <div className="flex flex-row items-start w-full h-12 gap-6 px-5 pt-2 bg-white rounded-lg">
             <input
-              type="Name"
+              type="text"
               placeholder="Your Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="mt-px text-2xl text-black/100 outline-none border-none flex flex-col items-start w-full"
               required
             />
@@ -79,7 +99,6 @@ export default function SignupForm() {
             className="mt-px text-2xl text-black/100 outline-none border-none flex flex-col items-start w-full"
             required
           />
-
           {isPasswordVisible ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -128,7 +147,7 @@ export default function SignupForm() {
         </button>
         <div className="grid grid-row-2 gap-1 w-full font-['Inter'] items-center">
           <div className="text-center text-2xl text-[#2e2e2e]">
-            Doesn’t have account yet?{" "}
+            Already have an account?{" "}
             <span className="text-2xl font-semibold text-[rgba(6,_1,_255,_0.6)]">
               <Link to="/login">Login</Link>
             </span>

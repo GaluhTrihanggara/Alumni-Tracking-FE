@@ -1,81 +1,141 @@
-import { useState } from "react";
+// profile-page.jsx
+import { useState, useEffect } from "react";
 import Sidebar from "../../components/sidebar";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const EditProfilePage = () => {
-  const [profile, setProfile] = useState({
-    nama: "Thomas Hardison",
-    nomor_induk_mahasiswa: "20190801128",
-    program_studi: "",
-    kontak_telephone: "661-724-7734",
-    password: "1368 Hayhurst Lane",
-    jenis_kelamin: "Laki-laki",
-    perguruan_tinggi: "Universitas Esa Unggul",
-    jenjang: "Sarjana",
-    tahun_masuk: "2019",
-    pekerjaan_saat_ini: "Software Engineer",
-    nama_perusahaan: "Tech Company Inc",
-    mediaSosial: [
-      {
-        platform: "LinkedIn",
-        link: "https://www.linkedin.com/in/sbr-novrianta/?original_referer=https%3A%2F%2Fwww%2Egoogle%2Ecom%2F&originalSubdomain=id",
-      },
-    ],
-  });
-
+const ProfilePage = () => {
+  const [profile, setProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [programStudis, setProgramStudis] = useState([]);
+  const [tempMediaSosial, setTempMediaSosial] = useState([]);
+
+  useEffect(() => {
+    fetchProfile();
+    fetchProgramStudis();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const response = await fetch("http://localhost:3000/api/auth/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setProfile(data);
+        setTempMediaSosial(data.Media_Sosial_Alumnis || []);
+        console.log("Profile data:", data);
+      } else {
+        console.error("Failed to fetch profile:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
+  const fetchProgramStudis = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/program-studi", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setProgramStudis(data);
+    } catch (error) {
+      console.error("Error fetching program studis:", error);
+    }
+  };
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
   const handleMediaSosialChange = (index, field, value) => {
-    const updatedMediaSosial = [...profile.mediaSosial];
+    const updatedMediaSosial = [...tempMediaSosial];
+    if (!updatedMediaSosial[index]) {
+      updatedMediaSosial[index] = {};
+    }
     updatedMediaSosial[index][field] = value;
-    setProfile({ ...profile, mediaSosial: updatedMediaSosial });
+    setTempMediaSosial(updatedMediaSosial);
   };
 
   const addMediaSosial = () => {
-    if (profile.mediaSosial.length < 5) {
-      setProfile({
-        ...profile,
-        mediaSosial: [...profile.mediaSosial, { platform: "", link: "" }],
-      });
+    if (tempMediaSosial.length < 5) {
+      setTempMediaSosial([...tempMediaSosial, { platform: "", link: "" }]);
     } else {
-      alert("Anda hanya dapat menambahkan maksimal 5 media sosial.");
+      toast.error("Anda hanya dapat menambahkan maksimal 5 media sosial.");
     }
   };
 
   const removeMediaSosial = (index) => {
-    const updatedMediaSosial = profile.mediaSosial.filter(
-      (_, i) => i !== index
-    );
-    setProfile({ ...profile, mediaSosial: updatedMediaSosial });
+    const updatedMediaSosial = tempMediaSosial.filter((_, i) => i !== index);
+    setTempMediaSosial(updatedMediaSosial);
   };
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
-  console.log("Profile updated:", profile);
-  toast.success("Data berhasil disimpan", {
-    position: "top-center",
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-  });
-  setIsEditing(false);
-};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Profile updated:", profile);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/auth/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...profile,
+          program_studi_id: profile.program_studi_id,
+        }),
+      });
 
-  const handleCancel = () => {
-    setIsEditing(false);
+      const data = await response.json();
+
+      if (response.ok) {
+        setProfile(data);
+        toast.success("Data berhasil disimpan", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        setIsEditing(false);
+      } else {
+        console.error("Failed to save profile:", data);
+        toast.error("Gagal menyimpan data");
+      }
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      toast.error("Terjadi kesalahan saat menyimpan data");
+    }
   };
 
   const handleEdit = () => {
     setIsEditing(true);
+    setTempMediaSosial(profile.Media_Sosial_Alumnis || []);
   };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setTempMediaSosial(profile.Media_Sosial_Alumnis || []);
+  };
+
+  if (!profile) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex">
@@ -125,16 +185,18 @@ const EditProfilePage = () => {
                       Program Studi
                     </label>
                     <select
-                      name="program_studi"
-                      value={profile.program_studi}
+                      name="program_studi_id"
+                      value={profile.program_studi_id || ""}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     >
                       <option value="">Pilih Program Studi</option>
-                      <option value="Teknik Informatika">Teknik Informatika</option>
-                      <option value="Sistem Informasi">Sistem Informasi</option>
-                      <option value="Manajemen Informatika">Manajemen Informatika</option>
-                    </select>
+                     {programStudis.map((ps) => (
+                    <option key={ps.id} value={ps.id}>
+                      {ps.name}
+                    </option>
+                  ))}
+                </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
@@ -237,13 +299,14 @@ const EditProfilePage = () => {
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     >
-                      {Array.from({ length: 2030 - 1999 }, (_, i) => 2030 - i).map(
-                        (year) => (
-                          <option key={year} value={year.toString()}>
-                            {year}
-                          </option>
-                        )
-                      )}
+                      {Array.from(
+                        { length: 2030 - 1999 },
+                        (_, i) => 2030 - i
+                      ).map((year) => (
+                        <option key={year} value={year.toString()}>
+                          {year}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -275,12 +338,16 @@ const EditProfilePage = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Media Sosial
                   </label>
-                  {profile.mediaSosial.map((media, index) => (
+                  {tempMediaSosial.map((media, index) => (
                     <div key={index} className="flex space-x-2 mt-2">
                       <select
                         value={media.platform}
                         onChange={(e) =>
-                          handleMediaSosialChange(index, "platform", e.target.value)
+                          handleMediaSosialChange(
+                            index,
+                            "platform",
+                            e.target.value
+                          )
                         }
                         className="mt-1 block w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                       >
@@ -312,7 +379,7 @@ const EditProfilePage = () => {
                   <button
                     type="button"
                     onClick={addMediaSosial}
-                    disabled={profile.mediaSosial.length >= 5}
+                    disabled={tempMediaSosial?.length >= 5}
                     className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                   >
                     Tambah Media Sosial
@@ -362,7 +429,7 @@ const EditProfilePage = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Program Studi
                   </label>
-                  <p>{profile.program_studi}</p>
+                  <p>{profile.Program_Studi ? profile.Program_Studi.name : "Belum diisi"}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -423,11 +490,25 @@ const EditProfilePage = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   Media Sosial
                 </label>
-                {profile.mediaSosial.map((media, index) => (
-                  <div key={index} className="flex space-x-2 mt-2">
-                    <p>{media.platform}: <a href={media.link} target="_blank" rel="noopener noreferrer">{media.link}</a></p>
-                  </div>
-                ))}
+                {profile.Media_Sosial_Alumnis &&
+                profile.Media_Sosial_Alumnis.length > 0 ? (
+                  profile.Media_Sosial_Alumnis.map((media, index) => (
+                    <div key={index} className="mt-2">
+                      <p>
+                        {media.platform}:{" "}
+                        <a
+                          href={media.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {media.link}
+                        </a>
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p>Belum ada media sosial yang ditambahkan</p>
+                )}
               </div>
               <div className="mt-6">
                 <button
@@ -446,4 +527,4 @@ const EditProfilePage = () => {
   );
 };
 
-export default EditProfilePage;
+export default ProfilePage;

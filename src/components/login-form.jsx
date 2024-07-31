@@ -1,3 +1,4 @@
+// login-form-page.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -11,13 +12,32 @@ export default function LoginForm() {
     setIsPasswordVisible((prev) => !prev);
   };
 
-  const submit = (e) => {
-    e.preventDefault();
-    // Fetch /login
-    console.log("Form Submit", username, password);
-    // Simulasi login sukses
-    navigate('/beranda');
-  };
+  const submit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch('http://localhost:3000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ nomor_induk_mahasiswa: username, password: password })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Simpan token ke localStorage atau sessionStorage
+      localStorage.setItem('token', data.token);
+      console.log("Login successful:", data);
+      navigate('/beranda');
+    } else {
+      console.error("Login failed:", data);
+      alert(data.message);
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+  }
+};
 
   return (
     <form
@@ -29,8 +49,7 @@ export default function LoginForm() {
           <div className="grid items-center grid-rows-2 mx-auto gap-y-4">
             <div className="text-4xl font-bold text-center">Login</div>
             <div className="w-full text-xl text-black/60">
-              Please login or signup to continue using Alumni Tracking  Universitas Esa
-              Unggul
+              Please login or signup to continue using Alumni Tracking  Universitas Esa Unggul
             </div>
           </div>
         </div>

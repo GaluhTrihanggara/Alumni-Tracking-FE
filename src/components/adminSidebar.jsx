@@ -6,7 +6,7 @@ const Sidebar = () => {
     { name: 'Home', icon: '🏠', path: '/beranda-admin' },
     { name: 'Profile Admin', icon: '👤', path: '/admin-profile' },
     { name: 'Change Password', icon: '🔑', path: '/admin-password' },
-     { name: 'Submissions', icon: <img src={submission} alt="Pengajuan" className="w-5 h-5" />, path: '/submission' },
+    { name: 'Submissions', icon: <img src={submission} alt="Pengajuan" className="w-5 h-5" />, path: '/submission' },
     { name: 'Privacy Policy', icon: '🔒', path: '/privacy-policy' },
     { name: 'Logout', icon: '🚪', path: '/login-admin' },
   ];

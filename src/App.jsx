@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./pages/user/login-page";
 import Signup from "./pages/user/signup-page";
 import Beranda from "./pages/user/beranda-page";
-import Profile from "./pages/user/edit-profile-page";
+import Profile from "./pages/user/profile-page";
 import ChangePassword from "./pages/user/change-password";
 import PrivacyPolicy from "./pages/user/privacy-page";
 import Search from "./pages/user/search-page";
