@@ -109,7 +109,7 @@ function BerandaAdmin() {
     e.preventDefault();
     // Reset the new submissions count when navigating to the submission page
     setNewSubmissionsCount(0);
-    navigate('/submission');
+    navigate('/admin-submission');
   }
 
   const handleChangePassword = (e) => {

@@ -8,7 +8,7 @@ const Sidebar = () => {
     { name: 'Kolaborasi Alumni', icon: <img src={collaborationIcon} alt="Kolaborasi Alumni" className="w-5 h-5" />, path: '/kolaborasi' },
     { name: 'Change Password', icon: '🔑', path: '/change_password' },
     { name: 'Privacy Policy', icon: '🔒', path: '/privacy_policy' },
-    { name: 'Logout', icon: '🚪', path: '/' },
+    { name: 'Logout', icon: '🚪', path: '/login' },
   ];
 
   return (

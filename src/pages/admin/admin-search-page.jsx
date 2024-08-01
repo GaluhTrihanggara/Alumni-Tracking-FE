@@ -197,7 +197,7 @@ function AlumniSearchPage() {
 
   const handleSubmission = (e) => {
     e.preventDefault();
-    navigate('/submission');
+    navigate('/admin-submission');
   }
 
   const hanclePrivacyPolicy = (e) => {

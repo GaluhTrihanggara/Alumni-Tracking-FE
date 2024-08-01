@@ -9,7 +9,8 @@ const ProfilePage = () => {
   const [programStudis, setProgramStudis] = useState([]);
   const [mediaSosialPlatforms, setMediaSosialPlatforms] = useState([]);
   const [tempMediaSosial, setTempMediaSosial] = useState([]);
-
+  const [originalProfile, setOriginalProfile] = useState(null);
+  
   useEffect(() => {
     fetchProfile();
     fetchProgramStudis();
@@ -32,6 +33,7 @@ const ProfilePage = () => {
 
       if (response.ok) {
         setProfile(data);
+        setOriginalProfile(data);
         setTempMediaSosial(data.Media_Sosial_Alumnis || []);
         console.log("Profile data:", data);
       } else {
@@ -102,46 +104,48 @@ const ProfilePage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3000/api/auth/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...profile,
-          program_studi_id: profile.program_studi_id,
-          Media_Sosial_Alumnis: tempMediaSosial,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setProfile(data);
-        setTempMediaSosial(data.Media_Sosial_Alumnis || []);
-        toast.success("Data berhasil disimpan", {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        setIsEditing(false);
-      } else {
-        console.error("Failed to save profile:", data);
-        toast.error("Gagal menyimpan data");
+  e.preventDefault();
+  try {
+    const token = localStorage.getItem("token");
+     // Create an object to hold the modified data
+    const changes = {};
+    for (const key in profile) {
+      if (profile[key] !== originalProfile[key]) {
+        changes[key] = profile[key];
       }
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      toast.error("Terjadi kesalahan saat menyimpan data");
     }
-  };
+    const response = await fetch("http://localhost:3000/api/auth/submit-profile-changes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+       body: JSON.stringify({ changes }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success("Data perubahan profile berhasil diajukan untuk persetujuan admin", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setIsEditing(false);
+    } else {
+      console.error("Failed to submit profile changes:", data);
+      toast.error("Gagal mengajukan perubahan profile");
+    }
+  } catch (error) {
+    console.error("Error submitting profile changes:", error);
+    toast.error("Terjadi kesalahan saat mengajukan perubahan profile");
+  }
+};
+
 
   const handleEdit = () => {
     setIsEditing(true);

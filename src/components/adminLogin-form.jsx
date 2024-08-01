@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-export default function LoginForm() {
+export default function AdminLoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -11,12 +11,30 @@ export default function LoginForm() {
     setIsPasswordVisible((prev) => !prev);
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    // Fetch /login
-    console.log("Form Submit", email, password);
-    // Simulasi login sukses
-    navigate('/beranda-admin');
+    try {
+      const response = await fetch('http://localhost:3000/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('adminToken', data.token);
+        console.log("Admin login successful:", data);
+        navigate('/beranda-admin');
+      } else {
+        console.error("Admin login failed:", data);
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error("Error during admin login:", error);
+    }
   };
 
   return (

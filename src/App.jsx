@@ -40,7 +40,7 @@ function App() {
           <Route path="/admin-password" element={<AdminChangePassword />} />
           <Route path="/admin-profile" element={<EditProfileAdmin />} />
           <Route path="/privacy-policy" element={<AdminPrivacyPolicy />} />
-          <Route path="/submission" element={<AdminSubmission />} />
+          <Route path="/admin-submission" element={<AdminSubmission />} />
         </Routes>
       </BrowserRouter>
     </div>
