@@ -114,6 +114,12 @@ const ProfilePage = () => {
         changes[key] = profile[key];
       }
     }
+    
+    // Tambahkan perubahan media sosial
+    if (JSON.stringify(tempMediaSosial) !== JSON.stringify(originalProfile.Media_Sosial_Alumnis)) {
+      changes.Media_Sosial_Alumnis = tempMediaSosial;
+    }
+    
     const response = await fetch("http://localhost:3000/api/auth/submit-profile-changes", {
       method: "POST",
       headers: {
