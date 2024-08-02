@@ -182,7 +182,7 @@ const SubmissionPage = () => {
             submissions.map((submission) => (
               <div key={submission.id} className="mb-6 border-b pb-4">
                 <h2 className="text-xl font-semibold mb-2">
-                  {submission.type || 'Unknown'} Submission
+                  {submission.type || 'Submission Profile'}
                 </h2>
                 <div className="grid grid-cols-1 gap-4 mb-4">
                   <div>
