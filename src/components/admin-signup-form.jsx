@@ -4,6 +4,7 @@ import { MdEmail } from "react-icons/md";
 import { MdLock } from "react-icons/md";
 
 export default function SignupForm() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -13,14 +14,30 @@ export default function SignupForm() {
     setIsPasswordVisible((prev) => !prev);
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:3000/api/admin/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: name, email: email, password: password}) // Sesuaikan dengan data yang diperlukan
+      });
 
-    // Fetch /login
-    console.log("Form Submit", email, password);
-  
-    // Redirect to login page
-    navigate("/login-admin");
+      const data = await response.json();
+
+      if (response.ok) {
+        // Simulasi signup sukses
+        console.log("Signup successful:", data);
+        navigate('/login-admin');
+      } else {
+        console.error("Signup failed:", data);
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error("Error during signup:", error);
+    }
   };
 
   return (
@@ -38,8 +55,10 @@ export default function SignupForm() {
           <div className="text-2xl font-semibold">Name</div>
           <div className="flex flex-row items-start w-full h-12 gap-6 px-5 pt-2 bg-white rounded-lg">
             <input
-              type="Name"
+              type="text"
               placeholder="Your Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="mt-px text-2xl text-black/100 outline-none border-none flex flex-col items-start w-full"
               required
             />
