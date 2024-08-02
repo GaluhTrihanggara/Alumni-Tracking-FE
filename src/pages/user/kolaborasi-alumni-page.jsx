@@ -4,7 +4,6 @@ import { Bell, User, Edit, Send, X } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import profileImage from '../../assets/user.jpg';
 import logo1 from "../../assets/alumni_tracking1.png";
-import { FaLinkedin, FaTwitter, FaFacebook } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -14,47 +13,30 @@ const KolaborasiAlumniPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
-  const [alumniData, setAlumniData] = useState({
-    name: "",
-    studentId: "",
-    major: "",
-    phone: "",
-    gender: "",
-    faculty: "",
-    degree: "",
-    entryYear: "",
-    currentJob: "",
-    company: "",
-    linkedin: "",
-    twitter: "",
-    facebook: ""
+  const [formData, setFormData] = useState({
+    nama: "",
+    nomor_induk_mahasiswa: "",
+    program_studi_id: "",
+    kontak_telephone: "",
+    jenis_kelamin: "",
+    perguruan_tinggi: "",
+    jenjang: "",
+    tahun_masuk: "",
+    status_mahasiswa_saat_ini: "",
+    pekerjaan_saat_ini: "",
+    nama_perusahaan: "",
+    mediaSosial: [{ media_sosial_id: "", link: "" }]
   });
 
-  const initialAlumniData = {
-    name: "",
-    studentId: "",
-    major: "",
-    phone: "",
-    gender: "",
-    faculty: "",
-    degree: "",
-    entryYear: "",
-    currentJob: "",
-    company: "",
-    linkedin: "",
-    twitter: "",
-    facebook: ""
-  };
+  const [programStudis, setProgramStudis] = useState([]);
+  const [mediaSosialPlatforms, setMediaSosialPlatforms] = useState([]);
 
-  const majors = ["Industrial Engineering", "Computer Science", "Electrical Engineering", "Mechanical Engineering"];
-  const genders = ["Laki-Laki", "Perempuan"];
-  const degrees = ["Sarjana", "Magister", "Doktor", "Diploma-1", "Diploma-2", "Diploma-3", "Diploma-4"];
-  const years = Array.from({ length: 2030 - 1999 }, (_, i) => 2030 - i);
 
-  const handleLogoClick = () => {
-    navigate('/beranda');
-  };
-  
+  useEffect(() => {
+    fetchProgramStudis();
+    fetchMediaSosialPlatforms();
+  }, []);
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target) &&
@@ -75,6 +57,40 @@ const KolaborasiAlumniPage = () => {
       return () => profileElement.removeEventListener('click', toggleMenu);
     }
   }, []);
+
+  const fetchProgramStudis = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/program-studi", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setProgramStudis(data);
+    } catch (error) {
+      console.error("Error fetching program studis:", error);
+    }
+  };
+
+  const fetchMediaSosialPlatforms = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/media-sosial", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setMediaSosialPlatforms(data);
+    } catch (error) {
+      console.error("Error fetching media sosial platforms:", error);
+    }
+  };
+
+  const handleLogoClick = () => {
+    navigate('/beranda');
+  };
 
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
@@ -114,53 +130,91 @@ const KolaborasiAlumniPage = () => {
     setIsEditMode(true);
   };
 
-  const handleSend = () => {
-    const requiredFields = [
-      'name', 'studentId', 'major', 'phone', 'gender', 
-      'faculty', 'degree', 'entryYear', 'currentJob', 'company'
-    ];
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
 
-    const isAnyFieldEmpty = requiredFields.some(field => !alumniData[field].trim());
+  const handleMediaSosialChange = (index, field, value) => {
+    const updatedMediaSosial = [...formData.mediaSosial];
+    updatedMediaSosial[index][field] = value;
+    setFormData(prevData => ({
+      ...prevData,
+      mediaSosial: updatedMediaSosial
+    }));
+  };
 
-    if (isAnyFieldEmpty) {
-      toast.error('Data harus diisi terlebih dahulu.', {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
+  const addMediaSosial = () => {
+    setFormData(prevData => ({
+      ...prevData,
+      mediaSosial: [...prevData.mediaSosial, { media_sosial_id: "", link: "" }]
+    }));
+  };
+
+  const removeMediaSosial = (index) => {
+    setFormData(prevData => ({
+      ...prevData,
+      mediaSosial: prevData.mediaSosial.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSend = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/kolaborasi-alumni/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
       });
-    } else {
-      console.log("Sending data:", alumniData);
-      setIsEditMode(false);
-      toast.success('Data sudah dikirim dan menunggu persetujuan dari admin.', {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      
-      // Reset the form data to initial state
-      setAlumniData(initialAlumniData);
+
+      if (response.ok) {
+        toast.success("Pengajuan data alumni baru berhasil dikirim");
+        setIsEditMode(false);
+        setFormData({
+          nama: "",
+          nomor_induk_mahasiswa: "",
+          kontak_telephone: "",
+          jenis_kelamin: "",
+          perguruan_tinggi: "",
+          jenjang: "",
+          tahun_masuk: "",
+          status_mahasiswa_saat_ini: "",
+          pekerjaan_saat_ini: "",
+          nama_perusahaan: "",
+          program_studi_id: "",
+          mediaSosial: [{ media_sosial_id: "", link: "" }]
+        });
+      } else {
+        toast.error("Gagal mengirim pengajuan data alumni baru");
+      }
+    } catch (error) {
+      console.error("Error submitting new alumni data:", error);
+      toast.error("Terjadi kesalahan saat mengirim pengajuan data alumni baru");
     }
   };
 
   const handleCancel = () => {
     setIsEditMode(false);
-    setAlumniData(initialAlumniData);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAlumniData(prevData => ({
-      ...prevData,
-      [name]: value
-    }));
+    setFormData({
+      nama: "",
+      nomor_induk_mahasiswa: "",
+      kontak_telephone: "",
+      jenis_kelamin: "",
+      perguruan_tinggi: "",
+      jenjang: "",
+      tahun_masuk: "",
+      status_mahasiswa_saat_ini: "",
+      pekerjaan_saat_ini: "",
+      nama_perusahaan: "",
+      program_studi_id: "",
+      mediaSosial: [{ media_sosial_id: "", link: "" }]
+    });
   };
 
   return (
@@ -172,10 +226,10 @@ const KolaborasiAlumniPage = () => {
         </div>
         <div className="flex items-center">
           <Bell 
-          className="text-white mr-6 cursor-pointer" 
-          size={24} 
-          onClick={handleBellClick} // Add this onClick handler
-        />
+            className="text-white mr-6 cursor-pointer" 
+            size={24} 
+            onClick={handleBellClick}
+          />
           <div 
             ref={profileRef}
             className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"
@@ -235,50 +289,98 @@ const KolaborasiAlumniPage = () => {
             </div>
 
             <div className="col-span-2 grid grid-cols-2 gap-4">
-              <InfoField label="Nama" value={alumniData.name} name="name" isEditMode={isEditMode} onChange={handleInputChange} />
-              <InfoField label="Nomor Induk Mahasiswa" value={alumniData.studentId} name="studentId" isEditMode={isEditMode} onChange={handleInputChange} />
+              <InfoField label="Nama" value={formData.nama} name="nama" isEditMode={isEditMode} onChange={handleInputChange} />
+              <InfoField label="Nomor Induk Mahasiswa" value={formData.nomor_induk_mahasiswa} name="nomor_induk_mahasiswa" isEditMode={isEditMode} onChange={handleInputChange} />
               <InfoField 
                 label="Program Studi" 
-                value={alumniData.major} 
-                name="major" 
+                value={formData.program_studi_id} 
+                name="program_studi_id" 
                 isEditMode={isEditMode} 
                 onChange={handleInputChange}
-                options={majors}
+                options={programStudis.map(ps => ({ value: ps.id, label: ps.name }))}
               />
-              <InfoField label="Kontak Telephone" value={alumniData.phone} name="phone" isEditMode={isEditMode} onChange={handleInputChange} />
+              <InfoField label="Kontak Telephone" value={formData.kontak_telephone} name="kontak_telephone" isEditMode={isEditMode} onChange={handleInputChange} />
               <InfoField 
                 label="Jenis Kelamin" 
-                value={alumniData.gender} 
-                name="gender" 
+                value={formData.jenis_kelamin} 
+                name="jenis_kelamin" 
                 isEditMode={isEditMode} 
                 onChange={handleInputChange}
-                options={genders}
+                options={[
+                  { value: "laki-laki", label: "Laki-laki" },
+                  { value: "perempuan", label: "Perempuan" }
+                ]}
               />
-              <InfoField label="Perguruan Tinggi" value={alumniData.faculty} name="faculty" isEditMode={isEditMode} onChange={handleInputChange} />
+              <InfoField label="Perguruan Tinggi" value={formData.perguruan_tinggi} name="perguruan_tinggi" isEditMode={isEditMode} onChange={handleInputChange} />
               <InfoField 
                 label="Jenjang" 
-                value={alumniData.degree} 
-                name="degree" 
+                value={formData.jenjang} 
+                name="jenjang" 
                 isEditMode={isEditMode} 
                 onChange={handleInputChange}
-                options={degrees}
+                options={[
+                  { value: "Sarjana", label: "Sarjana" },
+                  { value: "Magister", label: "Magister" },
+                  { value: "Doktor", label: "Doktor" },
+                  { value: "Diploma-1", label: "Diploma-1" },
+                  { value: "Diploma-2", label: "Diploma-2" },
+                  { value: "Diploma-3", label: "Diploma-3" },
+                  { value: "Diploma-4", label: "Diploma-4" },
+                ]}
               />
-              <InfoField 
+               <InfoField 
                 label="Tahun Masuk" 
-                value={alumniData.entryYear} 
-                name="entryYear" 
+                value={formData.tahun_masuk} 
+                name="tahun_masuk" 
                 isEditMode={isEditMode} 
                 onChange={handleInputChange}
-                options={years}
+                options={Array.from({ length: 2030 - 1999 }, (_, i) => ({ value: (2030 - i).toString(), label: (2030 - i).toString() }))}
               />
-              <InfoField label="Pekerjaan Saat Ini" value={alumniData.currentJob} name="currentJob" isEditMode={isEditMode} onChange={handleInputChange} />
-              <InfoField label="Nama Perusahaan" value={alumniData.company} name="company" isEditMode={isEditMode} onChange={handleInputChange} />
+              <InfoField label="Status Mahasiswa Saat Ini" value={formData.status_mahasiswa_saat_ini} name="status_mahasiswa_saat_ini" isEditMode={isEditMode} onChange={handleInputChange} />
+              <InfoField label="Pekerjaan Saat Ini" value={formData.pekerjaan_saat_ini} name="pekerjaan_saat_ini" isEditMode={isEditMode} onChange={handleInputChange} />
+              <InfoField label="Nama Perusahaan" value={formData.nama_perusahaan} name="nama_perusahaan" isEditMode={isEditMode} onChange={handleInputChange} />
+              {isEditMode && (
                 <div className="col-span-2">
-                <SocialMediaField label="LinkedIn" value={alumniData.linkedin} name="linkedin" isEditMode={isEditMode} onChange={handleInputChange} icon={<FaLinkedin />} />
-                <SocialMediaField label="Twitter" value={alumniData.twitter} name="twitter" isEditMode={isEditMode} onChange={handleInputChange} icon={<FaTwitter />} />
-                <SocialMediaField label="Facebook" value={alumniData.facebook} name="facebook" isEditMode={isEditMode} onChange={handleInputChange} icon={<FaFacebook />} />
+                  <label className="block text-sm font-medium text-gray-700">Media Sosial</label>
+                  {formData.mediaSosial.map((media, index) => (
+                    <div key={index} className="flex space-x-2 mt-2">
+                      <select
+                        value={media.media_sosial_id}
+                        onChange={(e) => handleMediaSosialChange(index, "media_sosial_id", e.target.value)}
+                        className="mt-1 block w-1/ 3 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                      >
+                        <option value="">Pilih Platform</option>
+                        {mediaSosialPlatforms.map((platform) => (
+                          <option key={platform.id} value={platform.id}>
+                            {platform.name}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        value={media.link}
+                        onChange={(e) => handleMediaSosialChange(index, "link", e.target.value)}
+                        placeholder="Link Media Sosial"
+                        className="mt-1 block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeMediaSosial(index)}
+                        className="mt-1 px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addMediaSosial}
+                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  >
+                    Tambah Media Sosial
+                  </button>
                 </div>
-              
+              )}
             </div>
           </div>
         </div>
@@ -300,7 +402,7 @@ const InfoField = ({ label, value, name, isEditMode, onChange, options }) => (
         >
           <option value="">Pilih {label}</option>
           {options.map((option, index) => (
-            <option key={index} value={option}>{option}</option>
+            <option key={index} value={option.value}>{option.label}</option>
           ))}
         </select>
       ) : (
@@ -313,7 +415,7 @@ const InfoField = ({ label, value, name, isEditMode, onChange, options }) => (
         />
       )
     ) : (
-      <div className="mt-1 text-gray-900">{value || "N/A"}</div>
+      <div className="mt-1 text-gray-900">{value || ""}</div>
     )}
   </div>
 );
@@ -324,7 +426,10 @@ InfoField.propTypes = {
   name: PropTypes.string.isRequired,
   isEditMode: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
-  options: PropTypes.array
+  options: PropTypes.arrayOf(PropTypes.shape({
+    value: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+  })),
 };
 
 const SocialMediaField = ({ label, value, name, isEditMode, onChange, icon }) => (
