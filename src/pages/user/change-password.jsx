@@ -10,7 +10,7 @@ const ChangePasswordPage = () => {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showPasswords, setShowPasswords] = useState(false);
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
   e.preventDefault();
   if (newPassword !== confirmNewPassword) {
     toast.error("Password baru dan konfirmasi password tidak cocok.", {
@@ -24,21 +24,57 @@ const ChangePasswordPage = () => {
     });
     return;
   }
-  // Here you can add your logic to handle password change
-  console.log("Password changed:", { currentPassword, newPassword });
-  toast.success("Password berhasil diubah.", {
-    position: "top-center",
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-  });
-  setCurrentPassword("");
-  setNewPassword("");
-  setConfirmNewPassword("");
-  setIsEditing(false);
+  
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch("http://localhost:3000/api/alumni/change-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success("Password berhasil diubah.", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setIsEditing(false);
+    } else {
+      toast.error(data.message, {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  } catch (error) {
+    console.error("Error changing password:", error);
+    toast.error("Terjadi kesalahan saat mengubah password.", {
+      position: "top-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }
 };
 
   const handleCancel = () => {
