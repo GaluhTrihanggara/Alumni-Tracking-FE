@@ -28,6 +28,10 @@ export default function LoginForm() {
     if (response.ok) {
       // Simpan token ke localStorage atau sessionStorage
       localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify({
+        nama: data.nama, // Pastikan backend mengirimkan nama pengguna
+        nomor_induk_mahasiswa: username,
+      }));
       console.log("Login successful:", data);
       navigate('/beranda');
     } else {

@@ -15,6 +15,7 @@ function Beranda() {
   const profileRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [userName, setUserName] = useState('');
 
   // Daftar alumni (contoh)
   const alumniList = [
@@ -50,6 +51,14 @@ function Beranda() {
       return () => profileElement.removeEventListener('click', toggleMenu);
     }
   }, []);
+
+   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.nama) {
+      setUserName(user.nama);
+    }
+  }, []);
+
 
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
@@ -150,7 +159,7 @@ function Beranda() {
           onClick={handleBellClick} // Add this onClick handler
         />
         <span className="text-white mr-4 mt-2 font-bold text-sm font-sans">
-          Halo, Galuh Trihanggara
+        Halo, {userName || 'Alumni'}
         </span>
         <div 
           ref={profileRef}
