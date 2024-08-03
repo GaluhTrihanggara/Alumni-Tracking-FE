@@ -25,12 +25,11 @@ const KolaborasiAlumniPage = () => {
     status_mahasiswa_saat_ini: "",
     pekerjaan_saat_ini: "",
     nama_perusahaan: "",
-    mediaSosial: [{ media_sosial_id: "", link: "" }]
+    mediaSosial: []
   });
 
   const [programStudis, setProgramStudis] = useState([]);
   const [mediaSosialPlatforms, setMediaSosialPlatforms] = useState([]);
-
 
   useEffect(() => {
     fetchProgramStudis();
@@ -140,6 +139,9 @@ const KolaborasiAlumniPage = () => {
 
   const handleMediaSosialChange = (index, field, value) => {
     const updatedMediaSosial = [...formData.mediaSosial];
+    if (!updatedMediaSosial[index]) {
+      updatedMediaSosial[index] = {};
+    }
     updatedMediaSosial[index][field] = value;
     setFormData(prevData => ({
       ...prevData,
@@ -188,7 +190,7 @@ const KolaborasiAlumniPage = () => {
           pekerjaan_saat_ini: "",
           nama_perusahaan: "",
           program_studi_id: "",
-          mediaSosial: [{ media_sosial_id: "", link: "" }]
+          mediaSosial: []
         });
       } else {
         toast.error("Gagal mengirim pengajuan data alumni baru");
@@ -213,7 +215,7 @@ const KolaborasiAlumniPage = () => {
       pekerjaan_saat_ini: "",
       nama_perusahaan: "",
       program_studi_id: "",
-      mediaSosial: [{ media_sosial_id: "", link: "" }]
+      mediaSosial: []
     });
   };
 
@@ -328,7 +330,7 @@ const KolaborasiAlumniPage = () => {
                   { value: "Diploma-4", label: "Diploma-4" },
                 ]}
               />
-               <InfoField 
+              <InfoField 
                 label="Tahun Masuk" 
                 value={formData.tahun_masuk} 
                 name="tahun_masuk" 
@@ -347,7 +349,7 @@ const KolaborasiAlumniPage = () => {
                       <select
                         value={media.media_sosial_id}
                         onChange={(e) => handleMediaSosialChange(index, "media_sosial_id", e.target.value)}
-                        className="mt-1 block w-1/ 3 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        className="mt-1 block w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                       >
                         <option value="">Pilih Platform</option>
                         {mediaSosialPlatforms.map((platform) => (
@@ -430,35 +432,6 @@ InfoField.propTypes = {
     value: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
   })),
-};
-
-const SocialMediaField = ({ label, value, name, isEditMode, onChange, icon }) => (
-  <div className="mb-4">
-    <div className="text-sm font-medium text-gray-500 flex items-center">
-      {icon}
-      <span className="ml-2">{label}</span>
-    </div>
-    {isEditMode ? (
-      <input
-        type="text"
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-      />
-    ) : (
-      <div className="mt-1 text-gray-900">{value || "N/A"}</div>
-    )}
-  </div>
-);
-
-SocialMediaField.propTypes = {
-  label: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  isEditMode: PropTypes.bool.isRequired,
-  onChange: PropTypes.func.isRequired,
-  icon: PropTypes.element.isRequired,
 };
 
 export default KolaborasiAlumniPage;

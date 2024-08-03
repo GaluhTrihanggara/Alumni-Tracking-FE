@@ -42,16 +42,17 @@ const SubmissionPage = () => {
           console.error('Failed to fetch submission changes');
         }
 
-        if (responseKolaborasi.ok) {
-          const jsonKolaborasi = await responseKolaborasi.json();
-          if (Array.isArray(jsonKolaborasi.data)) {
-            dataKolaborasi = jsonKolaborasi.data;
-          } else {
-            console.error('Expected dataKolaborasi.data to be an array but got:', jsonKolaborasi);
-          }
-        } else {
-          console.error('Failed to fetch kolaborasi alumni');
-        }
+       if (responseKolaborasi.ok) {
+  const jsonKolaborasi = await responseKolaborasi.json();
+  if (Array.isArray(jsonKolaborasi.data)) {
+    dataKolaborasi = jsonKolaborasi.data.map(item => ({
+      ...item,
+      mediaSosial: item.media_sosial_data || []
+    }));
+  } else {
+    console.error('Expected dataKolaborasi.data to be an array but got:', jsonKolaborasi);
+  }
+}
 
         // Combine and mark the data
         const combinedData = [
@@ -209,9 +210,21 @@ const SubmissionPage = () => {
       <p className="mb-2"><strong>Status:</strong> {kolaborasi.status_mahasiswa_saat_ini}</p>
       <p className="mb-2"><strong>Pekerjaan:</strong> {kolaborasi.pekerjaan_saat_ini}</p>
       <p className="mb-2"><strong>Perusahaan:</strong> {kolaborasi.nama_perusahaan}</p>
+       <p className="mb-2"><strong>Media Sosial:</strong></p>
+      {kolaborasi.media_sosial_data && kolaborasi.media_sosial_data.length > 0 ? (
+        <ul className="list-disc pl-5">
+          {kolaborasi.media_sosial_data.map((media, index) => (
+            <li key={index} className="mb-1">
+              {media.media_sosial_id}: {media.link}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="italic">Tidak ada media sosial yang ditambahkan</p>
+      )}
     </div>
-    );
-  };
+  );
+};
 
   return (
     <div className="flex">

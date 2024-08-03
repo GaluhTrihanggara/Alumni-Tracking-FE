@@ -10,36 +10,72 @@ const ChangePasswordAdminPage = () => {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showPasswords, setShowPasswords] = useState(false);
 
-  const handleChangePassword = (e) => {
-  e.preventDefault();
-  if (newPassword !== confirmNewPassword) {
-    toast.error("Password baru dan konfirmasi password tidak cocok.", {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-    return;
-  }
-  // Here you can add your logic to handle password change
-  console.log("Password changed:", { currentPassword, newPassword });
-  toast.success("Password berhasil diubah.", {
-    position: "top-center",
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-  });
-  setCurrentPassword("");
-  setNewPassword("");
-  setConfirmNewPassword("");
-  setIsEditing(false);
-};
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmNewPassword) {
+      toast.error("Password baru dan konfirmasi password tidak cocok.", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("adminToken");
+      const response = await fetch("http://localhost:3000/api/admin/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Password berhasil diubah.", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmNewPassword("");
+        setIsEditing(false);
+      } else {
+        toast.error(data.message, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      toast.error("Terjadi kesalahan saat mengubah password.", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
 
   const handleCancel = () => {
     setIsEditing(false);
@@ -104,19 +140,19 @@ const ChangePasswordAdminPage = () => {
                       value={confirmNewPassword}
                       onChange={(e) => setConfirmNewPassword(e.target.value)}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                      required                   
+                      required
                     />
                   </div>
                 </div>
                 <div>
-                    <button
-                      type="button"
-                      onClick={toggleShowPasswords}
-                      className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                    >
-                      {showPasswords ? "Hide Passwords" : "Show Passwords"}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={toggleShowPasswords}
+                    className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  >
+                    {showPasswords ? "Hide Passwords" : "Show Passwords"}
+                  </button>
+                </div>
                 <div className="mt-8 flex space-x-4">
                   <button
                     type="submit"
@@ -136,44 +172,6 @@ const ChangePasswordAdminPage = () => {
             </>
           ) : (
             <>
-              <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Current Password
-                    </label>
-                    <input
-                      type="password"
-                      name="currentPassword"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      name="newPassword"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Confirm New Password
-                    </label>
-                    <input
-                      type="password"
-                      name="confirmNewPassword"
-                      value={confirmNewPassword}
-                      onChange={(e) => setConfirmNewPassword(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                  </div>
-                </div>
               <div className="mt-6">
                 <button
                   type="button"
