@@ -117,13 +117,13 @@ function Beranda() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm) {
-      navigate(`/search?q=${encodeURIComponent(searchTerm)}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
   };
 
-  const handleSuggestionClick = (alumniId, alumniName) => {
+  const handleSuggestionClick = (alumniName) => {
     setSearchTerm(alumniName);
-    navigate(`/search?q=${encodeURIComponent(alumniName)}&id=${alumniId}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
+    navigate(`/search?q=${encodeURIComponent(alumniName)}`);
   };
 
   return (
@@ -218,7 +218,7 @@ function Beranda() {
         <div 
           key={alumnus.id} 
           className="px-5 py-3 hover:bg-gray-100 cursor-pointer flex items-center"
-          onClick={() => handleSuggestionClick(alumnus.id, alumnus.nama)}
+          onClick={() => handleSuggestionClick(alumnus.nama)}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
