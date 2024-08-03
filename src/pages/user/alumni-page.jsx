@@ -13,22 +13,27 @@ const AlumniPage = () => {
   const profileRef = useRef(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const alumniData = location.state?.alumniData || {
-    name: nameSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-    studentId: "",
-    major: "",
-    phone: "",
-    password: "",
-    gender: "",
-    faculty: "",
-    degree: "",
-    entryYear: "",
-    currentJob: "",
-    company: "",
-    linkedin: "#",
-    twitter: "#",
-    facebook: "#"
-  };
+  const [alumniData, setAlumniData] = useState(location.state?.alumniData || null);
+
+  useEffect(() => {
+    const fetchAlumniData = async () => {
+      if (!alumniData) {
+        try {
+          const response = await fetch(`http://localhost:3000/api/alumni/${nameSlug}`);
+          if (response.ok) {
+            const data = await response.json();
+            setAlumniData(data);
+          } else {
+            console.error('Failed to fetch alumni data');
+          }
+        } catch (error) {
+          console.error('Error fetching alumni data:', error);
+        }
+      }
+    };
+
+    fetchAlumniData();
+  }, [alumniData, nameSlug]);
 
   const handleLogoClick = () => {
     navigate('/beranda');
@@ -80,10 +85,14 @@ const AlumniPage = () => {
     navigate('/change_password');
   };
 
-  const hanclePrivacyPolicy = (e) => {
+  const handlePrivacyPolicy = (e) => {
     e.preventDefault();
     navigate('/privacy_policy');
   };
+
+  if (!alumniData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -102,25 +111,25 @@ const AlumniPage = () => {
             onClick={toggleMenu}
             style={{ border: '2px solid white', position: 'relative', zIndex: 1000 }}
           >
-            <img src={profileImage} alt="Galuh Trihanggara" className="w-full h-full object-cover" />
+            <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
           </div>
           {isMenuOpen && (
             <div ref={menuRef} className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <div className="px-4 py-2 text-sm text-gray-700 border-b flex items-center">
-                  <img src={profileImage} alt="Galuh Trihanggara" className="w-10 h-10 rounded-full mr-2" />
-                  <span>Galuh Trihanggara</span>
+                  <img src={profileImage} alt="Profile" className="w-10 h-10 rounded-full mr-2" />
+                  <span>Profile Name</span>
                 </div>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
                   Profile
                 </a>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleKolaborasiAlumni}> 
-                Kolaborasi Alumni
-              </a>
+                  Kolaborasi Alumni
+                </a>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
                   Change Password
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={hanclePrivacyPolicy}>
+                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handlePrivacyPolicy}>
                   Privacy Policy
                 </a>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleLogout}>
@@ -132,11 +141,11 @@ const AlumniPage = () => {
         </div>
       </header>
 
-       <main className="container mx-auto mt-12 p-3">
+      <main className="container mx-auto mt-12 p-3">
         <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-6xl mx-auto">
           <div className="bg-blue-600 p-2 text-white text-lg font-semibold flex items-center">
             <User className="w-7 h-8 mr-2 ml-2" />
-            Data Alumni: {alumniData.name}
+            Data Alumni: {alumniData.nama}
           </div>
 
           <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -147,17 +156,16 @@ const AlumniPage = () => {
             </div>
 
             <div className="col-span-2 grid grid-cols-2 gap-4">
-              <InfoField label="Nama" value={alumniData.name} />
-              <InfoField label="Nomor Induk Mahasiswa" value={alumniData.studentId} />
-              <InfoField label="Program Studi" value={alumniData.major} />
-              <InfoField label="Kontak Telephone" value={alumniData.phone} />
-              <InfoField label="Password" value={alumniData.password} type="password" />
-              <InfoField label="Jenis Kelamin" value={alumniData.gender} />
-              <InfoField label="Perguruan Tinggi" value={alumniData.faculty} />
-              <InfoField label="Jenjang" value={alumniData.degree} />
-              <InfoField label="Tahun Masuk" value={alumniData.entryYear} />
-              <InfoField label="Pekerjaan Saat Ini" value={alumniData.currentJob} />
-              <InfoField label="Nama Perusahaan" value={alumniData.company} />
+              <InfoField label="Nama" value={alumniData.nama} />
+              <InfoField label="Nomor Induk Mahasiswa" value={alumniData.nomor_induk_mahasiswa} />
+              <InfoField label="Program Studi" value={alumniData.Program_Studi?.name} />
+              <InfoField label="Kontak Telephone" value={alumniData.kontak_telephone} />
+              <InfoField label="Jenis Kelamin" value={alumniData.jenis_kelamin} />
+              <InfoField label="Perguruan Tinggi" value={alumniData.perguruan_tinggi} />
+              <InfoField label="Jenjang" value={alumniData.jenjang} />
+              <InfoField label="Tahun Masuk" value={alumniData.tahun_masuk} />
+              <InfoField label="Pekerjaan Saat Ini" value={alumniData.pekerjaan_saat_ini} />
+              <InfoField label="Nama Perusahaan" value={alumniData.nama_perusahaan} />
               <InfoField label="Media Sosial" value={
                 <div className="flex space-x-2">
                   <SocialLink href={alumniData.linkedin} icon={<FaLinkedin />} />
