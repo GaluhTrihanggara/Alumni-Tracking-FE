@@ -14,22 +14,8 @@ function Beranda() {
   const menuRef = useRef(null);
   const profileRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
   const [userName, setUserName] = useState('');
-
-  // Daftar alumni (contoh)
-  const alumniList = [
-    'Kairo Aditya Prabu',
-    'Kiran Aldan Hadi',
-    'Kaden Syafiq Hakim',
-    'Kairo Zidan Aulia',
-    'Irsan Nur Hidayat',
-    'Dedy Setiadi',
-    'Devira Asha',
-    'Audrie Arsya',
-    'Amir Mahmud',
-    'Andi Wijaya'
-  ];
+  const [alumni, setAlumni] = useState([]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -52,13 +38,12 @@ function Beranda() {
     }
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user && user.nama) {
       setUserName(user.nama);
     }
   }, []);
-
 
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
@@ -79,6 +64,7 @@ function Beranda() {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     navigate('/login');
   };
 
@@ -97,23 +83,34 @@ function Beranda() {
     navigate('/change_password');
   };
 
-  const hanclePrivacyPolicy = (e) =>{
+  const handlePrivacyPolicy = (e) => {
     e.preventDefault();
-    navigate('/privacy_policy')
-  }
+    navigate('/privacy_policy');
+  };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = async (e) => {
     const value = e.target.value;
     setSearchTerm(value);
     
     if (value) {
-      const filteredSuggestions = alumniList.filter(
-        alumni => alumni.toLowerCase().startsWith(value.toLowerCase())
-      ).sort((a, b) => a.localeCompare(b));
-      
-      setSuggestions(filteredSuggestions);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:3000/api/alumni/search?query=${encodeURIComponent(value)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setAlumni(data);
+        } else {
+          console.error('Failed to fetch alumni');
+        }
+      } catch (error) {
+        console.error('Error fetching alumni:', error);
+      }
     } else {
-      setSuggestions([]);
+      setAlumni([]);
     }
   };
 
@@ -124,9 +121,9 @@ function Beranda() {
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setSearchTerm(suggestion);
-    navigate(`/search?q=${encodeURIComponent(suggestion)}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
+  const handleSuggestionClick = (alumniId, alumniName) => {
+    setSearchTerm(alumniName);
+    navigate(`/search?q=${encodeURIComponent(alumniName)}&id=${alumniId}&content=all&page=1&title=0&mfd=all&from=all&to=all`);
   };
 
   return (
@@ -156,10 +153,10 @@ function Beranda() {
         <Bell 
           className="text-white mr-6 mt-2 cursor-pointer" 
           size={24} 
-          onClick={handleBellClick} // Add this onClick handler
+          onClick={handleBellClick}
         />
         <span className="text-white mr-4 mt-2 font-bold text-sm font-sans">
-        Halo, {userName || 'Alumni'}
+          Halo, {userName || 'Alumni'}
         </span>
         <div 
           ref={profileRef}
@@ -167,14 +164,14 @@ function Beranda() {
           onClick={toggleMenu}
           style={{ border: '2px solid white', position: 'relative', zIndex: 1000 }}
         >
-          <img src={profileImage} alt="Galuh Trihanggara" className="w-full h-full object-cover" />
+          <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
         </div>
         {isMenuOpen && (
           <div ref={menuRef} className="absolute right-20 mt-11 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu">
             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
               <div className="px-4 py-2 text-sm text-gray-700 border-b flex items-center">
-                <img src={profileImage} alt="Galuh Trihanggara" className="w-10 h-10 rounded-full mr-2" />
-                <span>Galuh Trihanggara</span>
+                <img src={profileImage} alt="Profile" className="w-10 h-10 rounded-full mr-2" />
+                <span>{userName || 'Alumni'}</span>
               </div>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
                 Profile
@@ -185,7 +182,7 @@ function Beranda() {
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
                 Change Password
               </a>
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={hanclePrivacyPolicy}>
+              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handlePrivacyPolicy}>
                 Privacy Policy
               </a>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleLogout}>
@@ -215,21 +212,21 @@ function Beranda() {
                 className="w-full outline-none"
               />
             </div>
-            {suggestions.length > 0 && (
-              <div className="max-h-60 overflow-y-auto">
-                {suggestions.map((suggestion, index) => (
-                  <div 
-                    key={index} 
-                    className="px-5 py-3 hover:bg-gray-100 cursor-pointer flex items-center"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    {suggestion}
-                  </div>
-                ))}
-              </div>
+           {alumni.length > 0 && (
+    <div className="max-h-60 overflow-y-auto">
+      {alumni.map((alumnus) => (
+        <div 
+          key={alumnus.id} 
+          className="px-5 py-3 hover:bg-gray-100 cursor-pointer flex items-center"
+          onClick={() => handleSuggestionClick(alumnus.id, alumnus.nama)}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          {alumnus.nama}
+        </div>
+      ))}
+    </div>
             )}
           </form>
         </div>
