@@ -10,7 +10,7 @@ import Alumni from "./pages/user/alumni-page";
 import Kolaborasi from "./pages/user/kolaborasi-alumni-page";
 import AdminLogin from "./pages/admin/admin-login-page";
 import AdminSignUp from "./pages/admin/admin-signup-page"
-import AdminSearch from "./pages/admin/admin-search-page";
+import AdminSearch from "./pages/admin/admin-search-alumni-page";
 import DataAlumniPage from "./pages/admin/admin-alumni-page";
 import BerandaAdmin from "./pages/admin/beranda-admin-page";
 import AdminChangePassword from "./pages/admin/change-password-admin";
@@ -35,7 +35,7 @@ function App() {
           <Route path="/login-admin" element={<AdminLogin />} />
           <Route path="/signup-admin" element={<AdminSignUp />} />
           <Route path="/beranda-admin" element={<BerandaAdmin />} />
-          <Route path="/admin-search" element={<AdminSearch />} />
+          <Route path="/admin/search" element={<AdminSearch />} />
           <Route path="/admin/alumni/:nameSlug" element={<DataAlumniPage/>} />
           <Route path="/admin-password" element={<AdminChangePassword />} />
           <Route path="/admin-profile" element={<EditProfileAdmin />} />

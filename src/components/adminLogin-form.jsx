@@ -26,6 +26,7 @@ export default function AdminLoginForm() {
 
       if (response.ok) {
         localStorage.setItem('adminToken', data.token);
+        localStorage.setItem('admin', JSON.stringify(data.admin)); // Simpan seluruh data admin
         console.log("Admin login successful:", data);
         navigate('/beranda-admin');
       } else {

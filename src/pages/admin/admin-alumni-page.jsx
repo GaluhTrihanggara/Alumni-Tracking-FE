@@ -1,14 +1,15 @@
-import PropTypes from 'prop-types';
-import { useState, useRef, useEffect } from 'react';
+import PropTypes from "prop-types";
+import { useState, useRef, useEffect } from "react";
 import { Bell, User, Edit, Save, XCircle } from "lucide-react";
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import profileImage from '../../assets/user.jpg';
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import profileImage from "../../assets/user.jpg";
 import logo1 from "../../assets/alumni_tracking1.png";
-import { FaLinkedin, FaTwitter, FaFacebook } from 'react-icons/fa';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { FaLinkedin, FaTwitter, FaFacebook } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AlumniPageAdmin = () => {
+  const [programStudis, setProgramStudis] = useState([]);
   const location = useLocation();
   const menuRef = useRef(null);
   const { nameSlug } = useParams();
@@ -17,33 +18,50 @@ const AlumniPageAdmin = () => {
   const lastToastTime = useRef(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [alumniData, setAlumniData] = useState(location.state?.alumniData || {
-    name: nameSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-    studentId: "",
-    major: "",
-    phone: "",
-    password: "",
-    gender: "",
-    faculty: "",
-    degree: "",
-    entryYear: "",
-    currentJob: "",
-    company: "",
-    linkedin: "#",
-    twitter: "#",
-    facebook: "#"
-  });
+  const [alumniData, setAlumniData] = useState(
+    location.state?.alumniData || null
+  );
 
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
-    navigate('/beranda-admin');
+    navigate("/beranda-admin");
+  };
+
+  const fetchProgramStudis = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const response = await fetch(
+        "http://localhost:3000/api/admin/program-studi",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch program studis");
+      }
+      const data = await response.json();
+      setProgramStudis(data);
+    } catch (error) {
+      console.error("Error fetching program studis:", error);
+      toast.error("Gagal mengambil data program studi");
+    }
   };
 
   useEffect(() => {
+    fetchProgramStudis();
+  }, []);
+
+  useEffect(() => {
     function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target) &&
-          profileRef.current && !profileRef.current.contains(event.target)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
         setIsMenuOpen(false);
       }
     }
@@ -55,16 +73,43 @@ const AlumniPageAdmin = () => {
 
   useEffect(() => {
     // Load the submission count from localStorage
-    const storedCount = localStorage.getItem('submissionsCount');
+    const storedCount = localStorage.getItem("submissionsCount");
     setNewSubmissionsCount(storedCount ? parseInt(storedCount, 10) : 0);
   }, []);
 
+  // Fetch alumni data if not provided via location state
+  useEffect(() => {
+    const fetchAlumniData = async () => {
+      if (!alumniData) {
+        try {
+          const token = localStorage.getItem("adminToken");
+          const response = await fetch(
+            `http://localhost:3000/api/admin/alumni/${nameSlug}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch alumni data");
+          }
+          const data = await response.json();
+          setAlumniData(data);
+        } catch (error) {
+          console.error("Error fetching alumni data:", error);
+        }
+      }
+    };
+    fetchAlumniData();
+  }, [alumniData, nameSlug]);
+
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
-    setIsMenuOpen(prevState => !prevState);
+    setIsMenuOpen((prevState) => !prevState);
   };
 
-    const handleBellClick = () => {
+  const handleBellClick = () => {
     const now = Date.now();
     const timeSinceLastToast = now - lastToastTime.current;
 
@@ -81,7 +126,7 @@ const AlumniPageAdmin = () => {
           progress: undefined,
         });
       } else {
-        toast.info('Tidak ada data pengajuan', {
+        toast.info("Tidak ada data pengajuan", {
           position: "top-center",
           autoClose: 3000,
           hideProgressBar: false,
@@ -96,47 +141,77 @@ const AlumniPageAdmin = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login-admin');
+    localStorage.removeItem("user");
+    navigate("/login-admin");
   };
 
   const handleProfile = (e) => {
     e.preventDefault();
-    navigate('/admin-profile');
+    navigate("/admin-profile");
   };
 
   const handleChangePassword = (e) => {
     e.preventDefault();
-    navigate('/admin-password');
+    navigate("/admin-password");
   };
 
   const handleSubmission = (e) => {
     e.preventDefault();
-    navigate('/admin-submission');
-  }
+    navigate("/admin-submission");
+  };
 
   const hanclePrivacyPolicy = (e) => {
     e.preventDefault();
-    navigate('/privacy_policy');
+    navigate("/privacy_policy");
   };
 
   const handleEdit = () => {
     setIsEditMode(true);
   };
 
-  const handleSave = (e) => {
+  // Save alumni data
+  const handleSave = async (e) => {
     e.preventDefault();
-  console.log("Profile updated:", alumniData);
-  toast.success("Data berhasil disimpan", {
-    position: "top-center",
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-  });
-    setIsEditMode(false);
+    try {
+      const token = localStorage.getItem("adminToken");
+      const response = await fetch(
+        `http://localhost:3000/api/admin/alumni/${alumniData.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(alumniData),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to update alumni data");
+      }
+      const updatedData = await response.json();
+      setAlumniData(updatedData);
+      toast.success("Data berhasil disimpan", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setIsEditMode(false);
+    } catch (error) {
+      console.error("Error updating alumni data:", error);
+      toast.error("Gagal menyimpan data: " + error.message, {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -148,30 +223,11 @@ const AlumniPageAdmin = () => {
     const { name, value } = e.target;
     setAlumniData((prevData) => ({
       ...prevData,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const programStudiOptions = [
-    "Teknik Informatika",
-    "Sistem Informasi",
-    "Ilmu Komputer",
-    "Teknik Elektro",
-    // Add other options as needed
-  ];
-
-  const genderOptions = [
-    "Laki-laki",
-    "Perempuan"
-  ];
-
-  const facultyOptions = [
-    "Fakultas Ilmu Komputer",
-    "Fakultas Teknik",
-    "Fakultas Ekonomi",
-    "Fakultas Hukum",
-    // Add other options as needed
-  ];
+  const genderOptions = ["Laki-laki", "Perempuan"];
 
   const degreeOptions = [
     "Sarjana",
@@ -180,10 +236,13 @@ const AlumniPageAdmin = () => {
     "Diploma-1",
     "Diploma-2",
     "Diploma-3",
-    "Diploma-4"
+    "Diploma-4",
   ];
 
-  const entryYearOptions = Array.from({ length: 2030 - 1999 }, (_, i) => 2030 - i);
+  const entryYearOptions = Array.from(
+    { length: 2030 - 1999 },
+    (_, i) => 2030 - i
+  );
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -197,45 +256,90 @@ const AlumniPageAdmin = () => {
         </div>
         <div className="flex items-center">
           <div className="relative">
-          <Bell 
-          className="text-white mr-8 mt-1 cursor-pointer" 
-          size={24} 
-          onClick={handleBellClick} // Add this onClick handler
-        />
-        {newSubmissionsCount > 0 && (
-            <div className="absolute bottom-3.5 right-3 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
-              {newSubmissionsCount}
-            </div>
-          )}
-        </div>
-          <div 
+            <Bell
+              className="text-white mr-8 mt-1 cursor-pointer"
+              size={24}
+              onClick={handleBellClick}
+            />
+            {newSubmissionsCount > 0 && (
+              <div className="absolute bottom-3.5 right-3 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                {newSubmissionsCount}
+              </div>
+            )}
+          </div>
+          <div
             ref={profileRef}
             className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"
             onClick={toggleMenu}
-            style={{ border: '2px solid white', position: 'relative', zIndex: 1000 }}
+            style={{
+              border: "2px solid white",
+              position: "relative",
+              zIndex: 1000,
+            }}
           >
-            <img src={profileImage} alt="Galuh Trihanggara" className="w-full h-full object-cover" />
+            <img
+              src={profileImage}
+              alt="Galuh Trihanggara"
+              className="w-full h-full object-cover"
+            />
           </div>
           {isMenuOpen && (
-            <div ref={menuRef} className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            <div
+              ref={menuRef}
+              className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu"
+            >
+              <div
+                className="py-1"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="options-menu"
+              >
                 <div className="px-4 py-2 text-sm text-gray-700 border-b flex items-center">
-                  <img src={profileImage} alt="Galuh Trihanggara" className="w-10 h-10 rounded-full mr-2" />
+                  <img
+                    src={profileImage}
+                    alt="Galuh Trihanggara"
+                    className="w-10 h-10 rounded-full mr-2"
+                  />
                   <span>Galuh Trihanggara</span>
                 </div>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleProfile}
+                >
                   Profile
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleChangePassword}
+                >
                   Change Password
                 </a>
-                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleSubmission}>
-                Submissions 
-              </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={hanclePrivacyPolicy}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleSubmission}
+                >
+                  Submissions
+                </a>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={hanclePrivacyPolicy}
+                >
                   Privacy Policy
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleLogout}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleLogout}
+                >
                   Logout
                 </a>
               </div>
@@ -248,20 +352,29 @@ const AlumniPageAdmin = () => {
         <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-6xl mx-auto">
           <div className="bg-blue-600 p-2 text-white text-lg font-semibold flex items-center">
             <User className="w-7 h-8 mr-2 ml-2" />
-            Data Alumni: {alumniData.name}
+            Data Alumni: {alumniData.nama}
             <div className="ml-auto flex space-x-2">
               {!isEditMode ? (
-                <button onClick={handleEdit} className="flex items-center px-4 py-2 bg-white text-blue-600 rounded-md">
+                <button
+                  onClick={handleEdit}
+                  className="flex items-center px-4 py-2 bg-white text-blue-600 rounded-md"
+                >
                   <Edit className="mr-2" size={16} />
                   Edit
                 </button>
               ) : (
                 <>
-                  <button onClick={handleSave} className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md mr-2">
+                  <button
+                    onClick={handleSave}
+                    className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md mr-2"
+                  >
                     <Save className="mr-2" size={16} />
                     Save
                   </button>
-                  <button onClick={handleCancel} className="flex items-center px-2 py-2 bg-red-500 text-white rounded-md">
+                  <button
+                    onClick={handleCancel}
+                    className="flex items-center px-2 py-2 bg-red-500 text-white rounded-md"
+                  >
                     <XCircle className="mr-2" size={16} />
                     Cancel
                   </button>
@@ -278,24 +391,99 @@ const AlumniPageAdmin = () => {
             </div>
 
             <div className="col-span-2 grid grid-cols-2 gap-4">
-              <InfoField label="Nama" value={alumniData.name} isEditMode={isEditMode} name="name" handleChange={handleChange} />
-              <InfoField label="Nomor Induk Mahasiswa" value={alumniData.studentId} isEditMode={isEditMode} name="studentId" handleChange={handleChange} />
-              <InfoField label="Program Studi" value={alumniData.major} isEditMode={isEditMode} isDropdown name="major" handleChange={handleChange} options={programStudiOptions} />
-              <InfoField label="Kontak Telephone" value={alumniData.phone} isEditMode={isEditMode} name="phone" handleChange={handleChange} />
-              <InfoField label="Password" value={alumniData.password} type="password" isEditMode={isEditMode} name="password" handleChange={handleChange} />
-              <InfoField label="Jenis Kelamin" value={alumniData.gender} isEditMode={isEditMode} isDropdown name="gender" handleChange={handleChange} options={genderOptions} />
-              <InfoField label="Perguruan Tinggi" value={alumniData.faculty} isEditMode={isEditMode} isDropdown name="faculty" handleChange={handleChange} options={facultyOptions} />
-              <InfoField label="Jenjang" value={alumniData.degree} isEditMode={isEditMode} isDropdown name="degree" handleChange={handleChange} options={degreeOptions} />
-              <InfoField label="Tahun Masuk" value={alumniData.entryYear} isEditMode={isEditMode} isDropdown name="entryYear" handleChange={handleChange} options={entryYearOptions} />
-              <InfoField label="Pekerjaan Saat Ini" value={alumniData.currentJob} isEditMode={isEditMode} name="currentJob" handleChange={handleChange} />
-              <InfoField label="Nama Perusahaan" value={alumniData.company} isEditMode={isEditMode} name="company" handleChange={handleChange} />
-              <InfoField label="Media Sosial" value={
-                <div className="flex space-x-2">
-                  <SocialLink href={alumniData.linkedin} icon={<FaLinkedin />} />
-                  <SocialLink href={alumniData.twitter} icon={<FaTwitter />} />
-                  <SocialLink href={alumniData.facebook} icon={<FaFacebook />} />
+              <InfoField
+                label="Nama"
+                value={alumniData.nama}
+                isEditMode={isEditMode}
+                name="nama"
+                handleChange={handleChange}
+              />
+              <InfoField
+                label="Nomor Induk Mahasiswa"
+                value={alumniData.nomor_induk_mahasiswa}
+                isEditMode={isEditMode}
+                name="nomor_induk_mahasiswa"
+                handleChange={handleChange}
+              />
+              <InfoField
+                label="Program Studi"
+                value={alumniData.program_studi_id}
+                isEditMode={isEditMode}
+                isDropdown
+                name="program_studi_id"
+                handleChange={handleChange}
+                options={programStudis}
+                displayOption={(option) => option.name}
+                displayValue={(value) =>
+                  programStudis.find((ps) => ps.id === value)?.name || ""
+                }
+              />
+
+              <InfoField
+                label="Kontak Telephone"
+                value={alumniData.kontak_telephone}
+                isEditMode={isEditMode}
+                name="kontak_telephone"
+                handleChange={handleChange}
+              />
+              <InfoField
+                label="Jenis Kelamin"
+                value={alumniData.jenis_kelamin}
+                isEditMode={isEditMode}
+                isDropdown
+                name="jenis_kelamin"
+                handleChange={handleChange}
+                options={genderOptions}
+              />
+              <InfoField
+                label="Perguruan Tinggi"
+                value={alumniData.perguruan_tinggi}
+                isEditMode={isEditMode}
+                name="perguruan_tinggi"
+                handleChange={handleChange}
+              />
+              <InfoField
+                label="Jenjang"
+                value={alumniData.jenjang}
+                isEditMode={isEditMode}
+                isDropdown
+                name="jenjang"
+                handleChange={handleChange}
+                options={degreeOptions}
+              />
+              <InfoField
+                label="Tahun Masuk"
+                value={alumniData.tahun_masuk}
+                isEditMode={isEditMode}
+                isDropdown
+                name="tahun_masuk"
+                handleChange={handleChange}
+                options={entryYearOptions}
+              />
+              <InfoField
+                label="Pekerjaan Saat Ini"
+                value={alumniData.pekerjaan_saat_ini}
+                isEditMode={isEditMode}
+                name="pekerjaan_saat_ini"
+                handleChange={handleChange}
+              />
+              <InfoField
+                label="Nama Perusahaan"
+                value={alumniData.nama_perusahaan}
+                isEditMode={isEditMode}
+                name="nama_perusahaan"
+                handleChange={handleChange}
+              />
+              <InfoField
+                label="Media Sosial"
+                value={
+                  <div className="flex space-x-2">
+                  <SocialLink href={alumniData.link} icon={<FaLinkedin />} />
+                  <SocialLink href={alumniData.link} icon={<FaTwitter />} />
+                  <SocialLink href={alumniData.link} icon={<FaFacebook />} />
                 </div>
-              } />
+                }
+              />
             </div>
           </div>
         </div>
@@ -304,35 +492,55 @@ const AlumniPageAdmin = () => {
   );
 };
 
-const InfoField = ({ label, value, type = "text", isEditMode, name, handleChange, isDropdown, options }) => (
+const InfoField = ({
+  label,
+  value,
+  type = "text",
+  isEditMode,
+  name,
+  handleChange,
+  isDropdown,
+  options,
+  displayOption,
+  displayValue,
+}) => (
   <div className="mb-4">
-    <div className="text-sm font-medium text-gray-500">{label}</div>
-    <div className={`mt-1 ${type === "password" ? "text-sm text-gray-900" : "text-gray-900"}`}>
+    <label className="block text-sm font-medium text-gray-700">{label}</label>
+    <div
+      className={`mt-1 ${
+        type === "password" ? "text-sm text-gray-900" : "text-gray-900"
+      }`}
+    >
       {isEditMode ? (
         isDropdown ? (
-          <select 
-            name={name} 
-            value={value} 
-            onChange={handleChange} 
-            className="w-full border border-gray-300 p-2 rounded-md"
+          <select
+            name={name}
+            value={value || ""}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           >
-            {options.map(option => (
-              <option key={option} value={option}>
-                {option}
+            <option value="">Pilih {label}</option>
+            {options.map((option) => (
+              <option key={option.id || option} value={option.id || option}>
+                {displayOption ? displayOption(option) : option}
               </option>
             ))}
           </select>
         ) : (
-          <input 
-            type={type} 
-            name={name} 
-            value={value} 
-            onChange={handleChange} 
-            className="w-full border border-gray-300 p-2 rounded-md"
+          <input
+            type={type}
+            name={name}
+            value={value || ""}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
           />
         )
+      ) : displayValue ? (
+        displayValue(value)
+      ) : type === "password" ? (
+        "••••••••"
       ) : (
-        type === "password" ? "••••••••" : value
+        value
       )}
     </div>
   </div>
@@ -346,7 +554,18 @@ InfoField.propTypes = {
   name: PropTypes.string,
   handleChange: PropTypes.func,
   isDropdown: PropTypes.bool,
-  options: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number]))
+  options: PropTypes.arrayOf(
+    PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+      PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        name: PropTypes.string,
+      }),
+    ])
+  ),
+  displayOption: PropTypes.func,
+  displayValue: PropTypes.func,
 };
 
 const SocialLink = ({ href, icon }) => (

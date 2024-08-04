@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Bell, User } from "lucide-react";
 import logo1 from "../../assets/alumni_tracking1.png";
 import FormGroup from '@mui/material/FormGroup';
@@ -10,112 +10,23 @@ import { MdFilterListAlt } from "react-icons/md";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function AlumniSearchPage() {
+function AdminSearchAlumniPage() {
   const menuRef = useRef(null);
   const profileRef = useRef(null);
+  const searchRef = useRef(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedAlumni] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [alumni, setAlumni] = useState([]);
   const [isProgramFilterEnabled, setIsProgramFilterEnabled] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState("");
   const [isYearFilterEnabled, setIsYearFilterEnabled] = useState(false);
   const [fromYear, setFromYear] = useState("");
   const [toYear, setToYear] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const lastToastTime = useRef(0);
-  const [newSubmissionsCount, setNewSubmissionsCount] = useState(0);
-  const dummyAlumni = [
-    {
-      id: 1,
-      name: "Dedy Setiady",
-      faculty: "Fakultas Ilmu Komputer",
-      major: "Teknik Informatika",
-      studentId: "2018080105",
-      degree: "Sarjana",
-      phone: "081234567890",
-      password: "••••••••",
-      gender: "Laki-Laki",
-      university: "Universitas Esa Unggul",
-      entryYear: "2018",
-      currentJob: "Software Engineer",
-      company: "Tech Innovators Inc.",
-      linkedin: "https://www.linkedin.com/in/dedy-setiady",
-      twitter: "https://twitter.com/dedysetiady",
-      facebook: "https://www.facebook.com/dedysetiady"
-    },
-    {
-      id: 2,
-      name: "Deni Setiadi",
-      faculty: "Fakultas Ekonomi dan Bisnis",
-      major: "Manajemen",
-      studentId: "2019040126",
-      degree: "Sarjana",
-      phone: "081234567890",
-      password: "••••••••",
-      gender: "Laki-Laki",
-      university: "Universitas Esa Unggul",
-      entryYear: "2019",
-      currentJob: "Software Engineer",
-      company: "Tech Innovators Inc.",
-      linkedin: "https://www.linkedin.com/in/dedy-setiady",
-      twitter: "https://twitter.com/dedysetiady",
-      facebook: "https://www.facebook.com/dedysetiady"
-    },
-    {
-      id: 3,
-      name: "Dedy Gunandar",
-      faculty: "Fakultas Hukum",
-      major: "Ilmu Hukum",
-      studentId: "2020030504",
-      degree: "Sarjana",
-      phone: "081234567890",
-      password: "••••••••",
-      gender: "Laki-Laki",
-      university: "Universitas Esa Unggul",
-      entryYear: "2017",
-      currentJob: "Software Engineer",
-      company: "Tech Innovators Inc.",
-      linkedin: "https://www.linkedin.com/in/dedy-setiady",
-      twitter: "https://twitter.com/dedysetiady",
-      facebook: "https://www.facebook.com/dedysetiady"
-    },
-    {
-      id: 4,
-      name: "Dedy Kurniawan",
-      faculty: "Fakultas Ilmu Komputer",
-      major: "Teknik Informatika",
-      studentId: "2021040133",
-      degree: "Sarjana",
-      phone: "081234567890",
-      password: "••••••••",
-      gender: "Laki-Laki",
-      university: "Universitas Esa Unggul",
-      entryYear: "2017",
-      currentJob: "Software Engineer",
-      company: "Tech Innovators Inc.",
-      linkedin: "https://www.linkedin.com/in/dedy-setiady",
-      twitter: "https://twitter.com/dedysetiady",
-      facebook: "https://www.facebook.com/dedysetiady"
-    },
-    {
-      id: 5,
-      name: "Teddy Setiadi",
-      faculty: "Fakultas Ilmu Komputer",
-      major: "Teknik Informatika",
-      studentId: "2022040134",
-      degree: "Sarjana",
-      phone: "081234567890",
-      password: "••••••••",
-      gender: "Laki-Laki",
-      university: "Universitas Esa Unggul",
-      entryYear: "2019",
-      currentJob: "Software Engineer",
-      company: "Tech Innovators Inc.",
-      linkedin: "https://www.linkedin.com/in/dedy-setiady",
-      twitter: "https://twitter.com/dedysetiady",
-      facebook: "https://www.facebook.com/dedysetiady"
-    },
-  ];
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -139,10 +50,75 @@ function AlumniSearchPage() {
   }, []);
 
   useEffect(() => {
-    // Load the submission count from localStorage
-    const storedCount = localStorage.getItem('submissionsCount');
-    setNewSubmissionsCount(storedCount ? parseInt(storedCount, 10) : 0);
+    const params = new URLSearchParams(location.search);
+    const query = params.get('q');
+    setSearchQuery(query || "");
+    if (query) {
+      fetchAlumni(query);
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
+
+  const fetchAlumni = async (query, filters = {}) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      let url = `http://localhost:3000/api/admin/search?query=${encodeURIComponent(query)}`;
+      
+      if (filters.fromYear) url += `&fromYear=${filters.fromYear}`;
+      if (filters.toYear) url += `&toYear=${filters.toYear}`;
+      if (filters.programStudi) url += `&programStudi=${encodeURIComponent(filters.programStudi)}`;
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAlumni(data);
+        setSuggestions(data);
+      } else {
+        console.error('Failed to fetch alumni');
+      }
+    } catch (error) {
+      console.error('Error fetching alumni:', error);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (value) {
+      fetchAlumni(value);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    navigate(`/admin-search?q=${encodeURIComponent(searchQuery)}`);
+  };
+
+  const handleSuggestionClick = (name) => {
+    setSearchQuery(name);
+    setShowSuggestions(false);
+    navigate(`/admin-search?q=${encodeURIComponent(name)}`);
+  };
 
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
@@ -153,29 +129,16 @@ function AlumniSearchPage() {
     const now = Date.now();
     const timeSinceLastToast = now - lastToastTime.current;
 
-    // Only show toast if it's been more than 3 seconds since the last one
     if (timeSinceLastToast >= 3000) {
-      if (newSubmissionsCount > 0) {
-        toast.info(`Pending ${newSubmissionsCount} data pengajuan`, {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      } else {
-        toast.info('Tidak ada data pengajuan', {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
+      toast.info('Tidak ada data pengajuan', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       lastToastTime.current = now;
     }
   };
@@ -200,7 +163,7 @@ function AlumniSearchPage() {
     navigate('/admin-submission');
   }
 
-  const hanclePrivacyPolicy = (e) => {
+  const handlePrivacyPolicy = (e) => {
     e.preventDefault();
     navigate('/privacy_policy');
   };
@@ -210,21 +173,14 @@ function AlumniSearchPage() {
   };
 
   const handleAlumniClick = (alumni) => {
-  const nameSlug = alumni.name.toLowerCase().replace(/ /g, '-');
-  navigate(`/admin/alumni/${nameSlug}`, { state: { alumniData: alumni } });
-};
-
-  const filteredAlumni = dummyAlumni.filter((alumni) => {
-  const matchesSearch = alumni.name.toLowerCase().includes(searchQuery.toLowerCase());
-  const matchesProgram = !isProgramFilterEnabled || alumni.major === selectedProgram;
-  
-  const alumniYear = parseInt(alumni.studentId.substring(0, 4));
-  const matchesYear = !isYearFilterEnabled || (
-    (fromYear === "" || alumniYear >= parseInt(fromYear)) &&
-    (toYear === "" || alumniYear <= parseInt(toYear))
-  );
-  return matchesSearch && matchesProgram && matchesYear;
-});
+    if (alumni && alumni.nama) {
+      const nameSlug = alumni.nama.toLowerCase().replace(/ /g, '-');
+      navigate(`/admin/alumni/${nameSlug}`, { state: { alumniData: alumni } });
+    } else {
+      console.error('Data alumni tidak valid:', alumni);
+      toast.error('Terjadi kesalahan saat membuka profil alumni');
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
@@ -236,59 +192,68 @@ function AlumniSearchPage() {
         >
           <img src={logo1} alt="Alumni Tracking Logo" className="h-8 mr-2" />
         </div>
-        <div className="flex-grow mx-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Dedy Setiady"
-              className="w-2/3 p-2 pl-12 rounded-md"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Search
-              className="absolute left-3 top-2 text-gray-400"
-              size={20}
-            />
-          </div>
+        <div className="flex-grow mx-4 relative">
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search Alumni"
+                className="w-full p-2 pl-12 rounded-md border"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onFocus={() => setShowSuggestions(true)}
+              />
+              <button type="submit" className="absolute left-3 top-2 text-gray-400">
+                <Search size={20} />
+              </button>
+            </div>
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+                {suggestions.map((suggestion) => (
+                  <div
+                    key={suggestion.id}
+                    className="px-4 py-2 cursor-pointer hover:bg-gray-100 flex items-center"
+                    onClick={() => handleSuggestionClick(suggestion.nama)}
+                  >
+                    <Search size={16} className="mr-2 text-gray-400" />
+                    {suggestion.nama}
+                  </div>
+                ))}
+              </div>
+            )}
+          </form>
         </div>
         <div className="flex items-center">
-          <div className="relative">
           <Bell 
-          className="text-white mr-8 mt-1 cursor-pointer" 
-          size={24} 
-          onClick={handleBellClick} // Add this onClick handler
-        />
-        {newSubmissionsCount > 0 && (
-            <div className="absolute bottom-3.5 right-3 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
-              {newSubmissionsCount}
-            </div>
-          )}
-        </div>
+            className="text-white mr-6 cursor-pointer" 
+            size={24} 
+            onClick={handleBellClick}
+          />
           <div 
             ref={profileRef}
             className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"
             onClick={toggleMenu}
             style={{ border: '2px solid white', position: 'relative', zIndex: 1000 }}
           >
-            <img src={profileImage} alt="Galuh Trihanggara" className="w-full h-full object-cover" />
+            <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
           </div>
-          {isMenuOpen && (
+           {isMenuOpen && (
             <div ref={menuRef} className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <div className="px-4 py-2 text-sm text-gray-700 border-b flex items-center">
-                  <img src={profileImage} alt="Galuh Trihanggara" className="w-10 h-10 rounded-full mr-2" />
-                  <span>Galuh Trihanggara</span>
+                  <img src={profileImage} alt="Profile" className="w-10 h-10 rounded-full mr-2" />
+                  <span>Profile Name</span>
                 </div>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
                   Profile
                 </a>
+                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleSubmission}> 
+                  Submissions
+                </a>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
                   Change Password
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleSubmission}>
-                Submissions 
-              </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={hanclePrivacyPolicy}>
+                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handlePrivacyPolicy}>
                   Privacy Policy
                 </a>
                 <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleLogout}>
@@ -371,33 +336,31 @@ function AlumniSearchPage() {
         </aside>
 
         <section className="flex-grow p-4">
-      <p className="mb-4">
-        Menampilkan {filteredAlumni.length} hasil pencarian dalam 0.442 detik
-      </p>
-      {filteredAlumni.map((alumni) => (
-        <div
-          key={alumni.id}
-          className={`bg-white p-4 mb-4 rounded-md shadow-sm flex items-start cursor-pointer ${
-            selectedAlumni === alumni.id ? "border-2 border-blue-500" : ""
-          }`}
-          onClick={() => handleAlumniClick(alumni)}
-        >
-          <div className="bg-gray-300 w-12 h-12 rounded-full flex items-center justify-center mr-4">
-            <User className="text-gray-600" size={24} />
-          </div>
-          <div className="space-y-2">
-            <h3 className="font-bold text-xl">{alumni.name}</h3>
-            <p>{alumni.faculty}</p>
-            <p>{alumni.major}</p>
-            <p>{alumni.studentId}</p>
-            <p>{alumni.degree}</p>
-          </div>
-        </div>
-      ))}
-    </section>
-    </main>
+          <p className="mb-4">
+            Menampilkan {alumni.length} hasil pencarian dalam 0.442 detik
+          </p>
+          {alumni.map((alumnus) => (
+            <div
+              key={alumnus.id}
+              className="bg-white p-4 mb-4 rounded-md shadow-sm flex items-start cursor-pointer"
+              onClick={() => handleAlumniClick(alumnus)}
+            >
+              <div className="bg-gray-300 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                <User className="text-gray-600" size={24} />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-bold text-xl">{alumnus.nama}</h3>
+                <p>Nomor Induk Mahasiswa: {alumnus.nomor_induk_mahasiswa}</p>
+                <p>Program Studi: {alumnus.Program_Studi?.name}</p>
+                <p>Jenjang: {alumnus.jenjang}</p>
+                <p>Tahun Masuk: {alumnus.tahun_masuk}</p>
+              </div>
+            </div>
+          ))}
+        </section>
+      </main>
     </div>
   );
 }
 
-export default AlumniSearchPage;
+export default AdminSearchAlumniPage;
