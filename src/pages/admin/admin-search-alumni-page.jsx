@@ -117,7 +117,7 @@ function AdminSearchAlumniPage() {
   const handleSuggestionClick = (name) => {
     setSearchQuery(name);
     setShowSuggestions(false);
-    navigate(`/admin-search?q=${encodeURIComponent(name)}`);
+    navigate(`/admin/search?q=${encodeURIComponent(name)}`);
   };
 
   const toggleMenu = (e) => {

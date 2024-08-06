@@ -1,16 +1,22 @@
 import PropTypes from "prop-types";
-import { useState, useRef, useEffect } from "react";
-import { Bell, User, Edit, Save, XCircle } from "lucide-react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  Bell,
+  User,
+  Edit,
+  Save,
+  XCircle,
+  PlusCircle,
+  Trash2,
+} from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import profileImage from "../../assets/user.jpg";
 import logo1 from "../../assets/alumni_tracking1.png";
-import { FaLinkedin, FaTwitter, FaFacebook } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AlumniPageAdmin = () => {
   const [programStudis, setProgramStudis] = useState([]);
-  const location = useLocation();
   const menuRef = useRef(null);
   const { nameSlug } = useParams();
   const [newSubmissionsCount, setNewSubmissionsCount] = useState(0);
@@ -18,15 +24,35 @@ const AlumniPageAdmin = () => {
   const lastToastTime = useRef(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [alumniData, setAlumniData] = useState(
-    location.state?.alumniData || null
-  );
-
+  const [alumniData, setAlumniData] = useState(null);
+  const [mediaSosialPlatforms, setMediaSosialPlatforms] = useState([]);
+  const [tempMediaSosial, setTempMediaSosial] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  const handleLogoClick = () => {
-    navigate("/beranda-admin");
-  };
+  // Fetch alumni data if not provided via location state
+     const fetchAlumniData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`http://localhost:3000/api/admin/alumni/${nameSlug}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch alumni data');
+      }
+      const data = await response.json();
+      setAlumniData(data);
+      setTempMediaSosial(data.Media_Sosial_Alumnis || []);
+    } catch (error) {
+      console.error('Error fetching alumni data:', error);
+      toast.error('Failed to load alumni data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [nameSlug]);
 
   const fetchProgramStudis = async () => {
     try {
@@ -50,9 +76,58 @@ const AlumniPageAdmin = () => {
     }
   };
 
+  const fetchMediaSosialPlatforms = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const response = await fetch(
+        "http://localhost:3000/api/admin/media-sosial/",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setMediaSosialPlatforms(data);
+    } catch (error) {
+      console.error("Error fetching media sosial platforms:", error);
+    }
+  };
+  
   useEffect(() => {
+    fetchAlumniData();
     fetchProgramStudis();
-  }, []);
+    fetchMediaSosialPlatforms();
+  }, [fetchAlumniData]);
+  
+
+   const handleEdit = () => {
+    setIsEditMode(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditMode(false);
+    setTempMediaSosial(alumniData.Media_Sosial_Alumnis || []);
+  };
+
+  const handleMediaSosialChange = (index, field, value) => {
+    const updatedMediaSosial = [...tempMediaSosial];
+    updatedMediaSosial[index] = { ...updatedMediaSosial[index], [field]: value };
+    setTempMediaSosial(updatedMediaSosial);
+  };
+
+  const addMediaSosial = () => {
+    if (tempMediaSosial.length < 5) {
+      setTempMediaSosial([...tempMediaSosial, { media_sosial_id: "", link: "" }]);
+    } else {
+      toast.error("Anda hanya dapat menambahkan maksimal 5 media sosial.");
+    }
+  };
+
+  const removeMediaSosial = (index) => {
+    const updatedMediaSosial = tempMediaSosial.filter((_, i) => i !== index);
+    setTempMediaSosial(updatedMediaSosial);
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -76,33 +151,6 @@ const AlumniPageAdmin = () => {
     const storedCount = localStorage.getItem("submissionsCount");
     setNewSubmissionsCount(storedCount ? parseInt(storedCount, 10) : 0);
   }, []);
-
-  // Fetch alumni data if not provided via location state
-  useEffect(() => {
-    const fetchAlumniData = async () => {
-      if (!alumniData) {
-        try {
-          const token = localStorage.getItem("adminToken");
-          const response = await fetch(
-            `http://localhost:3000/api/admin/alumni/${nameSlug}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch alumni data");
-          }
-          const data = await response.json();
-          setAlumniData(data);
-        } catch (error) {
-          console.error("Error fetching alumni data:", error);
-        }
-      }
-    };
-    fetchAlumniData();
-  }, [alumniData, nameSlug]);
 
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
@@ -140,6 +188,10 @@ const AlumniPageAdmin = () => {
     }
   };
 
+  const handleLogoClick = () => {
+    navigate("/beranda-admin");
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/login-admin");
@@ -165,84 +217,48 @@ const AlumniPageAdmin = () => {
     navigate("/privacy_policy");
   };
 
-  const handleEdit = () => {
-    setIsEditMode(true);
-  };
-
   // Save alumni data
-  const handleSave = async (e) => {
-    e.preventDefault();
+  const handleSave = async () => {
     try {
-      const token = localStorage.getItem("adminToken");
-      const response = await fetch(
-        `http://localhost:3000/api/admin/alumni/${alumniData.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(alumniData),
-        }
-      );
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`http://localhost:3000/api/admin/alumni/${alumniData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...alumniData,
+          Media_Sosial_Alumnis: tempMediaSosial
+        })
+      });
+
       if (!response.ok) {
-        throw new Error("Failed to update alumni data");
+        throw new Error('Failed to update alumni data');
       }
+
       const updatedData = await response.json();
       setAlumniData(updatedData);
-      toast.success("Data berhasil disimpan", {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
       setIsEditMode(false);
+      toast.success('Alumni data updated successfully');
     } catch (error) {
-      console.error("Error updating alumni data:", error);
-      toast.error("Gagal menyimpan data: " + error.message, {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      console.error('Error updating alumni data:', error);
+      toast.error('Failed to update alumni data');
     }
-  };
-
-  const handleCancel = () => {
-    // Reset to original data if needed
-    setIsEditMode(false);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setAlumniData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setAlumniData(prev => ({ ...prev, [name]: value }));
   };
 
-  const genderOptions = ["Laki-laki", "Perempuan"];
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  const degreeOptions = [
-    "Sarjana",
-    "Magister",
-    "Doktor",
-    "Diploma-1",
-    "Diploma-2",
-    "Diploma-3",
-    "Diploma-4",
-  ];
-
-  const entryYearOptions = Array.from(
-    { length: 2030 - 1999 },
-    (_, i) => 2030 - i
-  );
+  if (!alumniData) {
+    return <div>No alumni data found.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -418,7 +434,6 @@ const AlumniPageAdmin = () => {
                   programStudis.find((ps) => ps.id === value)?.name || ""
                 }
               />
-
               <InfoField
                 label="Kontak Telephone"
                 value={alumniData.kontak_telephone}
@@ -433,7 +448,7 @@ const AlumniPageAdmin = () => {
                 isDropdown
                 name="jenis_kelamin"
                 handleChange={handleChange}
-                options={genderOptions}
+                options={["Laki-laki", "Perempuan"]}
               />
               <InfoField
                 label="Perguruan Tinggi"
@@ -449,7 +464,7 @@ const AlumniPageAdmin = () => {
                 isDropdown
                 name="jenjang"
                 handleChange={handleChange}
-                options={degreeOptions}
+                options={["Sarjana", "Magister", "Doktor", "Diploma-1", "Diploma-2", "Diploma-3", "Diploma-4"]}
               />
               <InfoField
                 label="Tahun Masuk"
@@ -458,7 +473,7 @@ const AlumniPageAdmin = () => {
                 isDropdown
                 name="tahun_masuk"
                 handleChange={handleChange}
-                options={entryYearOptions}
+                options={Array.from({ length: 2030 - 1999 }, (_, i) => 2030 - i)}
               />
               <InfoField
                 label="Pekerjaan Saat Ini"
@@ -475,13 +490,86 @@ const AlumniPageAdmin = () => {
                 handleChange={handleChange}
               />
               <InfoField
-                label="Media Sosial"
-                value={
-                  <div className="flex space-x-2">
-                  <SocialLink href={alumniData.link} icon={<FaLinkedin />} />
-                  <SocialLink href={alumniData.link} icon={<FaTwitter />} />
-                  <SocialLink href={alumniData.link} icon={<FaFacebook />} />
-                </div>
+              label="Media Sosial"
+              value={
+                isEditMode ? (
+                  <div>
+                    {tempMediaSosial.map((media, index) => (
+                      <div key={index} className="flex space-x-2 mt-2">
+                        <select
+                          value={media.media_sosial_id}
+                          onChange={(e) =>
+                            handleMediaSosialChange(
+                              index,
+                              "media_sosial_id",
+                              e.target.value
+                            )
+                          }
+                          className="mt-1 block w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        >
+                          <option value="">Pilih Platform</option>
+                          {mediaSosialPlatforms.map((platform) => (
+                            <option key={platform.id} value={platform.id}>
+                              {platform.name}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          value={media.link}
+                          onChange={(e) =>
+                            handleMediaSosialChange(
+                              index,
+                              "link",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Link Media Sosial"
+                          className="mt-1 block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeMediaSosial(index)}
+                          className="mt-1 p-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addMediaSosial}
+                      disabled={tempMediaSosial.length >= 5}
+                      className="mt-2 flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    >
+                      <PlusCircle size={16} className="mr-2" />
+                      Tambah Media Sosial
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    {alumniData.Media_Sosial_Alumnis &&
+                    alumniData.Media_Sosial_Alumnis.length > 0 ? (
+                      alumniData.Media_Sosial_Alumnis.map((media, index) => (
+                        <div key={index} className="mt-2">
+                          <p>
+                            {media.Media_Sosial?.name || "Unknown Platform"}:{" "}
+                            <a
+                              href={media.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              {media.link}
+                            </a>
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p>Belum ada media sosial yang ditambahkan</p>
+                      )}
+                    </div>
+                  )
                 }
               />
             </div>
@@ -491,6 +579,7 @@ const AlumniPageAdmin = () => {
     </div>
   );
 };
+
 
 const InfoField = ({
   label,
@@ -537,8 +626,6 @@ const InfoField = ({
         )
       ) : displayValue ? (
         displayValue(value)
-      ) : type === "password" ? (
-        "••••••••"
       ) : (
         value
       )}
@@ -548,35 +635,15 @@ const InfoField = ({
 
 InfoField.propTypes = {
   label: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   type: PropTypes.string,
   isEditMode: PropTypes.bool,
   name: PropTypes.string,
   handleChange: PropTypes.func,
   isDropdown: PropTypes.bool,
-  options: PropTypes.arrayOf(
-    PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number,
-      PropTypes.shape({
-        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        name: PropTypes.string,
-      }),
-    ])
-  ),
+  options: PropTypes.array,
   displayOption: PropTypes.func,
   displayValue: PropTypes.func,
-};
-
-const SocialLink = ({ href, icon }) => (
-  <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600">
-    {icon}
-  </a>
-);
-
-SocialLink.propTypes = {
-  href: PropTypes.string.isRequired,
-  icon: PropTypes.node.isRequired
 };
 
 export default AlumniPageAdmin;
