@@ -1,12 +1,66 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import Sidebar from "../../components/adminSidebar";
-import { FaSearch, FaSpinner } from 'react-icons/fa';
+import { FaSearch, FaSpinner,FaGraduationCap, FaLinkedin } from 'react-icons/fa';
 import { MdError } from 'react-icons/md';
+
+const AlumniCard = ({ alumniData }) => {
+  // Destructure dengan default values untuk menghindari error
+  const { name, pddiktiInfo = {}, linkedInProfile = {} } = alumniData || {};
+  const { isAlumni, university, alumniData: pddiktiData = {} } = pddiktiInfo;
+  
+  return (
+    <div className="bg-white shadow-lg rounded-lg p-6 mb-4">
+      <h3 className="text-xl font-bold mb-4">{name || 'Nama Tidak Tersedia'}</h3>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-semibold mb-2 flex items-center">
+            <FaGraduationCap className="mr-2" /> Data PDDIKTI
+          </h4>
+         <p><strong>Universitas:</strong> {university || 'Bukan dari Universitas Esa Unggul'}</p>
+          <p><strong>Status saat ini:</strong> {isAlumni ? 'Alumni' : 'Bukan Alumni'}</p>
+          <p><strong>Program Studi:</strong> {pddiktiData.program_studi || 'Tidak Tersedia'}</p>
+          <p><strong>NIM:</strong> {pddiktiData.nomor_induk_mahasiswa || 'Tidak Tersedia'}</p>
+          <p><strong>Tahun Masuk:</strong> {pddiktiData.tahun_masuk || 'Tidak Tersedia'}</p>
+          <p><strong>Status Terakhir Mahasiswa:</strong> {pddiktiData.status_mahasiswa_saat_ini || 'Tidak Tersedia'}</p>
+        </div>
+        <div>
+          <h4 className="font-semibold mb-2 flex items-center">
+            <FaLinkedin className="mr-2" /> Profil LinkedIn
+          </h4>
+          <p><strong>Pekerjaan:</strong> {linkedInProfile.jobTitle || 'Tidak Tersedia'}</p>
+          <p><strong>Perusahaan:</strong> {linkedInProfile.companyName || 'Tidak Tersedia'}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+AlumniCard.propTypes = {
+  alumniData: PropTypes.shape({
+    name: PropTypes.string,
+    pddiktiInfo: PropTypes.shape({
+      isFromEsaUnggul: PropTypes.bool,
+      isAlumni: PropTypes.bool,
+      university: PropTypes.string,
+      alumniData: PropTypes.shape({
+        program_studi: PropTypes.string,
+        nomor_induk_mahasiswa: PropTypes.string,
+        tahun_masuk: PropTypes.string,
+        status_mahasiswa_saat_ini: PropTypes.string
+      })
+    }),
+    linkedInProfile: PropTypes.shape({
+      jobTitle: PropTypes.string,
+      companyName: PropTypes.string
+    })
+  })
+};
 
 const ScrappingPage = () => {
   const [namaAlumni, setNamaAlumni] = useState('');
   const [sedangMemuat, setSedangMemuat] = useState(false);
-  const [hasil, setHasil] = useState(null);
+  const [hasil, setHasil] = useState([]);
   const [error, setError] = useState(null);
 
   const handlePerubahanInput = (e) => {
@@ -17,7 +71,7 @@ const ScrappingPage = () => {
     e.preventDefault();
     setSedangMemuat(true);
     setError(null);
-    setHasil(null);
+    setHasil([]);
 
     try {
       const daftarNama = namaAlumni.split(',').map(nama => nama.trim());
@@ -25,7 +79,7 @@ const ScrappingPage = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}` // Asumsi token admin disimpan di localStorage
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         },
         body: JSON.stringify({ names: daftarNama })
       });
@@ -35,7 +89,7 @@ const ScrappingPage = () => {
       }
 
       const data = await respons.json();
-      setHasil(data);
+      setHasil(data.data); // Assuming the API returns an array of results in the 'data' field
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan saat melakukan scraping data');
     } finally {
@@ -90,12 +144,12 @@ const ScrappingPage = () => {
               <MdError className="absolute top-0 right-0 mt-3 mr-4" />
             </div>
           )}
-          {hasil && (
+          {hasil.length > 0 && (
             <div className="mt-4">
               <h3 className="text-lg font-semibold mb-2">Hasil Scrapping:</h3>
-              <pre className="bg-gray-100 p-4 rounded overflow-x-auto">
-                {JSON.stringify(hasil, null, 2)}
-              </pre>
+              {hasil.map((alumniData, index) => (
+                <AlumniCard key={index} alumniData={alumniData} />
+              ))}
             </div>
           )}
         </div>
