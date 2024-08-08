@@ -207,6 +207,11 @@ const AlumniPageAdmin = () => {
     navigate("/admin-password");
   };
 
+  const handelScrappingAlumni = (e) => {
+    e.preventDefault();
+    navigate("/admin-scrapping");
+  };
+
   const handleSubmission = (e) => {
     e.preventDefault();
     navigate("/admin-submission");
@@ -334,6 +339,14 @@ const AlumniPageAdmin = () => {
                 >
                   Change Password
                 </a>
+                <a
+                href="#"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                role="menuitem"
+                onClick={handelScrappingAlumni}
+              >
+                Scrapping Alumni
+              </a>
                 <a
                   href="#"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

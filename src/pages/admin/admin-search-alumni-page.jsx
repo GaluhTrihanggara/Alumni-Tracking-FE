@@ -1,14 +1,14 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Bell, User } from "lucide-react";
 import logo1 from "../../assets/alumni_tracking1.png";
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
-import profileImage from '../../assets/user.jpg';
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
+import profileImage from "../../assets/user.jpg";
 import { MdFilterListAlt } from "react-icons/md";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AdminSearchAlumniPage() {
   const menuRef = useRef(null);
@@ -30,8 +30,12 @@ function AdminSearchAlumniPage() {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target) &&
-          profileRef.current && !profileRef.current.contains(event.target)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
         setIsMenuOpen(false);
       }
     }
@@ -44,14 +48,14 @@ function AdminSearchAlumniPage() {
   useEffect(() => {
     const profileElement = profileRef.current;
     if (profileElement) {
-      profileElement.addEventListener('click', toggleMenu);
-      return () => profileElement.removeEventListener('click', toggleMenu);
+      profileElement.addEventListener("click", toggleMenu);
+      return () => profileElement.removeEventListener("click", toggleMenu);
     }
   }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const query = params.get('q');
+    const query = params.get("q");
     setSearchQuery(query || "");
     if (query) {
       fetchAlumni(query);
@@ -72,17 +76,20 @@ function AdminSearchAlumniPage() {
 
   const fetchAlumni = async (query, filters = {}) => {
     try {
-      const token = localStorage.getItem('adminToken');
-      let url = `http://localhost:3000/api/admin/search?query=${encodeURIComponent(query)}`;
-      
+      const token = localStorage.getItem("adminToken");
+      let url = `http://localhost:3000/api/admin/search?query=${encodeURIComponent(
+        query
+      )}`;
+
       if (filters.fromYear) url += `&fromYear=${filters.fromYear}`;
       if (filters.toYear) url += `&toYear=${filters.toYear}`;
-      if (filters.programStudi) url += `&programStudi=${encodeURIComponent(filters.programStudi)}`;
+      if (filters.programStudi)
+        url += `&programStudi=${encodeURIComponent(filters.programStudi)}`;
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
@@ -90,10 +97,10 @@ function AdminSearchAlumniPage() {
         setAlumni(data);
         setSuggestions(data);
       } else {
-        console.error('Failed to fetch alumni');
+        console.error("Failed to fetch alumni");
       }
     } catch (error) {
-      console.error('Error fetching alumni:', error);
+      console.error("Error fetching alumni:", error);
     }
   };
 
@@ -122,7 +129,7 @@ function AdminSearchAlumniPage() {
 
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
-    setIsMenuOpen(prevState => !prevState);
+    setIsMenuOpen((prevState) => !prevState);
   };
 
   const handleBellClick = () => {
@@ -130,7 +137,7 @@ function AdminSearchAlumniPage() {
     const timeSinceLastToast = now - lastToastTime.current;
 
     if (timeSinceLastToast >= 3000) {
-      toast.info('Tidak ada data pengajuan', {
+      toast.info("Tidak ada data pengajuan", {
         position: "top-center",
         autoClose: 3000,
         hideProgressBar: false,
@@ -144,41 +151,46 @@ function AdminSearchAlumniPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login-admin');
+    localStorage.removeItem("user");
+    navigate("/login-admin");
   };
 
   const handleProfile = (e) => {
     e.preventDefault();
-    navigate('/admin-profile');
+    navigate("/admin-profile");
   };
 
   const handleChangePassword = (e) => {
     e.preventDefault();
-    navigate('/admin-password');
+    navigate("/admin-password");
+  };
+
+  const handelScrappingAlumni = (e) => {
+    e.preventDefault();
+    navigate("/admin-scrapping");
   };
 
   const handleSubmission = (e) => {
     e.preventDefault();
-    navigate('/admin-submission');
-  }
+    navigate("/admin-submission");
+  };
 
   const handlePrivacyPolicy = (e) => {
     e.preventDefault();
-    navigate('/privacy_policy');
+    navigate("/privacy_policy");
   };
 
   const handleLogoClick = () => {
-    navigate('/beranda-admin');
+    navigate("/beranda-admin");
   };
 
   const handleAlumniClick = (alumni) => {
     if (alumni && alumni.nama) {
-      const nameSlug = alumni.nama.toLowerCase().replace(/ /g, '-');
+      const nameSlug = alumni.nama.toLowerCase().replace(/ /g, "-");
       navigate(`/admin/alumni/${nameSlug}`, { state: { alumniData: alumni } });
     } else {
-      console.error('Data alumni tidak valid:', alumni);
-      toast.error('Terjadi kesalahan saat membuka profil alumni');
+      console.error("Data alumni tidak valid:", alumni);
+      toast.error("Terjadi kesalahan saat membuka profil alumni");
     }
   };
 
@@ -203,7 +215,10 @@ function AdminSearchAlumniPage() {
                 onChange={handleSearchChange}
                 onFocus={() => setShowSuggestions(true)}
               />
-              <button type="submit" className="absolute left-3 top-2 text-gray-400">
+              <button
+                type="submit"
+                className="absolute left-3 top-2 text-gray-400"
+              >
                 <Search size={20} />
               </button>
             </div>
@@ -224,39 +239,92 @@ function AdminSearchAlumniPage() {
           </form>
         </div>
         <div className="flex items-center">
-          <Bell 
-            className="text-white mr-6 cursor-pointer" 
-            size={24} 
+          <Bell
+            className="text-white mr-6 cursor-pointer"
+            size={24}
             onClick={handleBellClick}
           />
-          <div 
+          <div
             ref={profileRef}
             className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"
             onClick={toggleMenu}
-            style={{ border: '2px solid white', position: 'relative', zIndex: 1000 }}
+            style={{
+              border: "2px solid white",
+              position: "relative",
+              zIndex: 1000,
+            }}
           >
-            <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+            <img
+              src={profileImage}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
           </div>
-           {isMenuOpen && (
-            <div ref={menuRef} className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+          {isMenuOpen && (
+            <div
+              ref={menuRef}
+              className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu"
+            >
+              <div
+                className="py-1"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="options-menu"
+              >
                 <div className="px-4 py-2 text-sm text-gray-700 border-b flex items-center">
-                  <img src={profileImage} alt="Profile" className="w-10 h-10 rounded-full mr-2" />
+                  <img
+                    src={profileImage}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full mr-2"
+                  />
                   <span>Profile Name</span>
                 </div>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleProfile}
+                >
                   Profile
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleSubmission}> 
-                  Submissions
-                </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleChangePassword}
+                >
                   Change Password
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handlePrivacyPolicy}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handelScrappingAlumni}
+                >
+                  Scrapping Alumni
+                </a>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleSubmission}
+                >
+                  Submissions
+                </a>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handlePrivacyPolicy}
+                >
                   Privacy Policy
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleLogout}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleLogout}
+                >
                   Logout
                 </a>
               </div>
@@ -278,7 +346,9 @@ function AdminSearchAlumniPage() {
                   control={
                     <Switch
                       checked={isYearFilterEnabled}
-                      onChange={() => setIsYearFilterEnabled(!isYearFilterEnabled)}
+                      onChange={() =>
+                        setIsYearFilterEnabled(!isYearFilterEnabled)
+                      }
                     />
                   }
                 />
@@ -313,7 +383,9 @@ function AdminSearchAlumniPage() {
                   control={
                     <Switch
                       checked={isProgramFilterEnabled}
-                      onChange={() => setIsProgramFilterEnabled(!isProgramFilterEnabled)}
+                      onChange={() =>
+                        setIsProgramFilterEnabled(!isProgramFilterEnabled)
+                      }
                     />
                   }
                 />

@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 import submission from '../assets/submission.png';
+import scrapping from '../assets/web-scraper.png';
 
 const Sidebar = () => {
   const menuItems = [
     { name: 'Home', icon: '🏠', path: '/beranda-admin' },
     { name: 'Profile Admin', icon: '👤', path: '/admin-profile' },
     { name: 'Change Password', icon: '🔑', path: '/admin-password' },
+    { name: 'Scrapping Alumni', icon: <img src={scrapping} alt="Scrapping" className="w-5 h-5" />, path: '/admin-scrapping' },
     { name: 'Submissions', icon: <img src={submission} alt="Pengajuan" className="w-5 h-5" />, path: '/admin-submission' },
     { name: 'Privacy Policy', icon: '🔒', path: '/privacy-policy' },
     { name: 'Logout', icon: '🚪', path: '/login-admin' },

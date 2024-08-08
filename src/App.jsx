@@ -17,6 +17,7 @@ import AdminChangePassword from "./pages/admin/change-password-admin";
 import EditProfileAdmin from "./pages/admin/edit-profile-admin";
 import AdminPrivacyPolicy from "./pages/admin/admin-privacy-page";
 import AdminSubmission from "./pages/admin/admin-pengajuan-page";
+import AdminScrapping from "./pages/admin/admin-scrapping-data";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
           <Route path="/admin-profile" element={<EditProfileAdmin />} />
           <Route path="/privacy-policy" element={<AdminPrivacyPolicy />} />
           <Route path="/admin-submission" element={<AdminSubmission />} />
+          <Route path="/admin-scrapping" element={<AdminScrapping />} />
         </Routes>
       </BrowserRouter>
     </div>

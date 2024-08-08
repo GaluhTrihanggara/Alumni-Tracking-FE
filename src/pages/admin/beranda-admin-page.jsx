@@ -102,15 +102,20 @@ function BerandaAdmin() {
     navigate("/admin-profile");
   };
 
+  const handleChangePassword = (e) => {
+    e.preventDefault();
+    navigate("/admin-password");
+  };
+  
+  const handelScrappingAlumni = (e) => {
+    e.preventDefault();
+    navigate("/admin-scrapping");
+  };
+
   const handleSubmission = (e) => {
     e.preventDefault();
     setNewSubmissionsCount(0);
     navigate("/admin-submission");
-  };
-
-  const handleChangePassword = (e) => {
-    e.preventDefault();
-    navigate("/admin-password");
   };
 
   const handlePrivacyPolicy = (e) => {
@@ -249,6 +254,14 @@ function BerandaAdmin() {
                 onClick={handleChangePassword}
               >
                 Change Password
+              </a>
+              <a
+                href="#"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                role="menuitem"
+                onClick={handelScrappingAlumni}
+              >
+                Scrapping Alumni
               </a>
               <a
                 href="#"
