@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Sidebar from "../../components/adminSidebar";
 import { FaSearch, FaSpinner,FaGraduationCap, FaLinkedin } from 'react-icons/fa';
 import { MdError } from 'react-icons/md';
+import { ToastContainer, toast } from 'react-toastify';
 
 const AlumniCard = ({ alumniData }) => {
   // Destructure dengan default values untuk menghindari error
@@ -90,8 +91,35 @@ const ScrappingPage = () => {
 
       const data = await respons.json();
       setHasil(data.data); // Assuming the API returns an array of results in the 'data' field
+      
+      // Send scraped data to submission endpoint
+      const submissionResponse = await fetch('http://localhost:3000/api/submit/scrape', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: JSON.stringify({ scrapedData: data.data })
+      });
+
+      if (!submissionResponse.ok) {
+        throw new Error('Gagal mengirim data ke submission');
+      }
+      
+      console.log('Data berhasil dikirim ke submission:', await submissionResponse.json());
+
+      toast.success('Data berhasil di-scrape dan dikirim untuk ditinjau', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan saat melakukan scraping data');
+      toast.error(err.message || 'Terjadi kesalahan saat melakukan scraping data');
     } finally {
       setSedangMemuat(false);
     }
@@ -101,6 +129,7 @@ const ScrappingPage = () => {
     <div className="flex">
       <Sidebar />
       <div className="flex-1 ml-64 p-8">
+        <ToastContainer />
         <h1 className="text-2xl font-bold mb-4">Scrapping Alumni</h1>
         <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
           <h2 className="text-xl font-semibold mb-4">Masukkan Nama Alumni untuk Scrapping</h2>
