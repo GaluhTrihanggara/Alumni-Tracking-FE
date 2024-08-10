@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import Sidebar from "../../components/adminSidebar";
-import { FaSearch, FaSpinner,FaGraduationCap, FaLinkedin } from 'react-icons/fa';
-import { MdError } from 'react-icons/md';
+import { FaSearch, FaSpinner, FaGraduationCap, FaLinkedin } from 'react-icons/fa';
+import { MdError, MdInfo } from 'react-icons/md';
 import { ToastContainer, toast } from 'react-toastify';
 
 const AlumniCard = ({ alumniData }) => {
@@ -10,7 +10,7 @@ const AlumniCard = ({ alumniData }) => {
   const { name, pddiktiInfo = {}, linkedInProfile = {} } = alumniData || {};
   const { isAlumni, university, alumniData: pddiktiData = {} } = pddiktiInfo;
   
-  return (
+ return (
     <div className="bg-white shadow-lg rounded-lg p-6 mb-4">
       <h3 className="text-xl font-bold mb-4">{name || 'Nama Tidak Tersedia'}</h3>
       <div className="grid grid-cols-2 gap-4">
@@ -18,19 +18,20 @@ const AlumniCard = ({ alumniData }) => {
           <h4 className="font-semibold mb-2 flex items-center">
             <FaGraduationCap className="mr-2" /> Data PDDIKTI
           </h4>
-         <p><strong>Universitas:</strong> {university || 'Bukan dari Universitas Esa Unggul'}</p>
           <p><strong>Status saat ini:</strong> {isAlumni ? 'Alumni' : 'Bukan Alumni'}</p>
-          <p><strong>Program Studi:</strong> {pddiktiData.program_studi || 'Tidak Tersedia'}</p>
-          <p><strong>NIM:</strong> {pddiktiData.nomor_induk_mahasiswa || 'Tidak Tersedia'}</p>
-          <p><strong>Tahun Masuk:</strong> {pddiktiData.tahun_masuk || 'Tidak Tersedia'}</p>
-          <p><strong>Status Terakhir Mahasiswa:</strong> {pddiktiData.status_mahasiswa_saat_ini || 'Tidak Tersedia'}</p>
+          <p><strong>Universitas:</strong> {university || 'Bukan dari Universitas Esa Unggul'}</p>
+          <p><strong>Jenjang:</strong> {pddiktiData?.jenjang|| 'Tidak Tersedia'}</p>
+          <p><strong>Program Studi:</strong> {pddiktiData?.program_studi || 'Tidak Tersedia'}</p>
+          <p><strong>NIM:</strong> {pddiktiData?.nomor_induk_mahasiswa || 'Tidak Tersedia'}</p>
+          <p><strong>Tahun Masuk:</strong> {pddiktiData?.tahun_masuk || 'Tidak Tersedia'}</p>
+          <p><strong>Status Terakhir Mahasiswa:</strong> {pddiktiData?.status_mahasiswa_saat_ini || 'Tidak Tersedia'}</p>
         </div>
         <div>
           <h4 className="font-semibold mb-2 flex items-center">
             <FaLinkedin className="mr-2" /> Profil LinkedIn
           </h4>
-          <p><strong>Pekerjaan:</strong> {linkedInProfile.jobTitle || 'Tidak Tersedia'}</p>
-          <p><strong>Perusahaan:</strong> {linkedInProfile.companyName || 'Tidak Tersedia'}</p>
+          <p><strong>Pekerjaan:</strong> {linkedInProfile?.jobTitle || 'Tidak Tersedia'}</p>
+          <p><strong>Perusahaan:</strong> {linkedInProfile?.companyName || 'Tidak Tersedia'}</p>
         </div>
       </div>
     </div>
@@ -63,6 +64,7 @@ const ScrappingPage = () => {
   const [sedangMemuat, setSedangMemuat] = useState(false);
   const [hasil, setHasil] = useState([]);
   const [error, setError] = useState(null);
+  const [nonAlumniMessage, setNonAlumniMessage] = useState(null);
 
   const handlePerubahanInput = (e) => {
     setNamaAlumni(e.target.value);
@@ -73,6 +75,7 @@ const ScrappingPage = () => {
     setSedangMemuat(true);
     setError(null);
     setHasil([]);
+    setNonAlumniMessage(null);
 
     try {
       const daftarNama = namaAlumni.split(',').map(nama => nama.trim());
@@ -90,33 +93,57 @@ const ScrappingPage = () => {
       }
 
       const data = await respons.json();
-      setHasil(data.data); // Assuming the API returns an array of results in the 'data' field
       
+       if (data.data && data.data.length > 0) {
+        const nonAlumni = data.data.filter(item => item.pddiktiInfo && !item.pddiktiInfo.isAlumni);
+        const alumni = data.data.filter(item => item.pddiktiInfo && item.pddiktiInfo.isAlumni);
+        
+        if (nonAlumni.length > 0) {
+          const names = nonAlumni.map(item => item.name).join(', ');
+          setNonAlumniMessage(`${names} belum menjadi alumni (status: ${nonAlumni[0].pddiktiInfo.status || 'Aktif'})`);
+        }
+        
+        if (alumni.length > 0) {
+          setHasil(alumni);
       // Send scraped data to submission endpoint
       const submissionResponse = await fetch('http://localhost:3000/api/submit/scrape', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        body: JSON.stringify({ scrapedData: data.data })
-      });
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify({ scrapedData: alumni })
+          });
 
-      if (!submissionResponse.ok) {
-        throw new Error('Gagal mengirim data ke submission');
+          if (!submissionResponse.ok) {
+            throw new Error('Gagal mengirim data ke submission');
+          }
+          
+          console.log('Data alumni berhasil dikirim ke submission:', await submissionResponse.json());
+
+          toast.success('Data alumni berhasil di-scrape dan dikirim untuk ditinjau', {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        } else {
+          toast.info('Tidak ada data alumni yang ditemukan untuk dikirim ke submission', {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        }
+      } else {
+        setNonAlumniMessage('Tidak ada data yang ditemukan untuk nama yang dicari.');
       }
-      
-      console.log('Data berhasil dikirim ke submission:', await submissionResponse.json());
-
-      toast.success('Data berhasil di-scrape dan dikirim untuk ditinjau', {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan saat melakukan scraping data');
       toast.error(err.message || 'Terjadi kesalahan saat melakukan scraping data');
@@ -171,6 +198,13 @@ const ScrappingPage = () => {
               <strong className="font-bold">Error!</strong>
               <span className="block sm:inline"> {error}</span>
               <MdError className="absolute top-0 right-0 mt-3 mr-4" />
+            </div>
+          )}
+          {nonAlumniMessage && (
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mt-4" role="alert">
+              <strong className="font-bold">Perhatian!</strong>
+              <span className="block sm:inline"> {nonAlumniMessage}</span>
+              <MdInfo className="absolute top-0 right-0 mt-3 mr-4" />
             </div>
           )}
           {hasil.length > 0 && (

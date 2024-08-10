@@ -295,6 +295,7 @@ const SubmissionPage = () => {
       <p><strong>Nama:</strong> {scraped.name}</p>
       <p><strong>Universitas:</strong> {pddiktiInfo?.university}</p>
       <p><strong>Program Studi:</strong> {pddiktiInfo?.alumniData?.program_studi}</p>
+      <p><strong>Jenjang:</strong> {pddiktiInfo?.alumniData?.jenjang}</p>
       <p><strong>NIM:</strong> {pddiktiInfo?.alumniData?.nomor_induk_mahasiswa}</p>
       <p><strong>Tahun Masuk:</strong> {pddiktiInfo?.alumniData?.tahun_masuk}</p>
       <p><strong>Status:</strong> {pddiktiInfo?.alumniData?.status_mahasiswa_saat_ini}</p>
