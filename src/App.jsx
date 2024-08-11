@@ -14,7 +14,7 @@ import AdminSearch from "./pages/admin/admin-search-alumni-page";
 import DataAlumniPage from "./pages/admin/admin-alumni-page";
 import BerandaAdmin from "./pages/admin/beranda-admin-page";
 import AdminChangePassword from "./pages/admin/change-password-admin";
-import EditProfileAdmin from "./pages/admin/edit-profile-admin";
+import ProfileAdmin from "./pages/admin/profile-admin";
 import AdminPrivacyPolicy from "./pages/admin/admin-privacy-page";
 import AdminSubmission from "./pages/admin/admin-pengajuan-page";
 import AdminScrapping from "./pages/admin/admin-scrapping-data";
@@ -39,7 +39,7 @@ function App() {
           <Route path="/admin/search" element={<AdminSearch />} />
           <Route path="/admin/alumni/:nameSlug" element={<DataAlumniPage/>} />
           <Route path="/admin-password" element={<AdminChangePassword />} />
-          <Route path="/admin-profile" element={<EditProfileAdmin />} />
+          <Route path="/admin-profile" element={<ProfileAdmin />} />
           <Route path="/privacy-policy" element={<AdminPrivacyPolicy />} />
           <Route path="/admin-submission" element={<AdminSubmission />} />
           <Route path="/admin-scrapping" element={<AdminScrapping />} />

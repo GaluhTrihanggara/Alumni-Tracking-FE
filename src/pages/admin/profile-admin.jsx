@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Sidebar from "../../components/adminSidebar";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -6,41 +6,87 @@ import 'react-toastify/dist/ReactToastify.css';
 const EditProfileAdminPage = () => {
   const lastToastTime = useRef(0);
   const [profile, setProfile] = useState({
-    nama: "Thomas Hardison",
-    email: "thomas.hardison@example.com",
-    password: "secret_password",
+    nama: "",
+    email: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    // Fetch admin profile data when component mounts
+    fetchAdminProfile();
+  }, []);
+
+  const fetchAdminProfile = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/admin/profile', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProfile({
+          nama: data.name,
+          email: data.email
+        });
+      } else {
+        toast.error("Failed to fetch admin profile");
+      }
+    } catch (error) {
+      console.error("Error fetching admin profile:", error);
+      toast.error("An error occurred while fetching profile");
+    }
+  };
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const now = Date.now();
     const timeSinceLastToast = now - lastToastTime.current;
 
-    // Only show toast and update profile if it's been more than 3 seconds since the last one
     if (timeSinceLastToast >= 3000) {
-      console.log("Profile updated:", profile);
-      toast.success("Data berhasil disimpan", {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      setIsEditing(false);
-      lastToastTime.current = now;
+      try {
+        const response = await fetch('http://localhost:3000/api/admin/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          },
+          body: JSON.stringify({
+            name: profile.nama,
+            email: profile.email
+          })
+        });
+
+        if (response.ok) {
+          toast.success("Profile updated successfully", {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          setIsEditing(false);
+          lastToastTime.current = now;
+        } else {
+          toast.error("Failed to update profile");
+        }
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        toast.error("An error occurred while updating profile");
+      }
     }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
+    fetchAdminProfile(); // Reset to original data
   };
 
   const handleEdit = () => {
@@ -88,18 +134,6 @@ const EditProfileAdminPage = () => {
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={profile.password}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                  </div>
                 </div>
                 <div className="mt-6 flex space-x-4">
                   <button
@@ -138,12 +172,6 @@ const EditProfileAdminPage = () => {
                     Email
                   </label>
                   <p>{profile.email}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Password
-                  </label>
-                  <p>{profile.password}</p>
                 </div>
               </div>
               <div className="mt-6">

@@ -54,15 +54,6 @@ function AdminSearchAlumniPage() {
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const query = params.get("q");
-    setSearchQuery(query || "");
-    if (query) {
-      fetchAlumni(query);
-    }
-  }, [location.search]);
-
-  useEffect(() => {
     function handleClickOutside(event) {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
@@ -73,6 +64,15 @@ function AdminSearchAlumniPage() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const query = params.get("q");
+    setSearchQuery(query || "");
+    if (query) {
+      fetchAlumni(query);
+    }
+  }, [location.search]);
 
   const fetchAlumni = async (query, filters = {}) => {
     try {
@@ -118,7 +118,15 @@ function AdminSearchAlumniPage() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    navigate(`/admin-search?q=${encodeURIComponent(searchQuery)}`);
+    const filters = {};
+    if (isYearFilterEnabled) {
+      filters.fromYear = fromYear;
+      filters.toYear = toYear;
+    }
+    if (isProgramFilterEnabled) {
+      filters.programStudi = selectedProgram;
+    }
+    fetchAlumni(searchQuery, filters);
   };
 
   const handleSuggestionClick = (name) => {
@@ -400,11 +408,24 @@ function AdminSearchAlumniPage() {
               <option value="">Pilih Program Studi</option>
               <option value="Teknik Informatika">Teknik Informatika</option>
               <option value="Sistem Informasi">Sistem Informasi</option>
-              <option value="Manajemen">Manajemen</option>
-              <option value="Ilmu Hukum">Ilmu Hukum</option>
+              <option value="Manajemen">Desain Komunikasi Visual</option>
+              <option value="Ilmu Hukum">Desain Produk</option>
+              <option value="Fisioterapi">Humas</option>
+              <option value="Fisioterapi">Jurnalistik</option>
+              <option value="Fisioterapi">Ilmu Hukum</option>
+              <option value="Fisioterapi">Broadcasting</option>
+              <option value="Fisioterapi">Akutansi</option>
               <option value="Fisioterapi">Fisioterapi</option>
+              <option value="Fisioterapi">Psikologi</option>
+              <option value="Fisioterapi">Farmasi</option>
             </select>
           </div>
+           <button
+            className="mt-4 bg-blue-500 text-white p-2 rounded-md w-full"
+            onClick={handleSearchSubmit}
+          >
+            Terapkan Filter
+          </button>
         </aside>
 
         <section className="flex-grow p-4">
