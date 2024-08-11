@@ -408,16 +408,16 @@ function AdminSearchAlumniPage() {
               <option value="">Pilih Program Studi</option>
               <option value="Teknik Informatika">Teknik Informatika</option>
               <option value="Sistem Informasi">Sistem Informasi</option>
-              <option value="Manajemen">Desain Komunikasi Visual</option>
-              <option value="Ilmu Hukum">Desain Produk</option>
-              <option value="Fisioterapi">Humas</option>
-              <option value="Fisioterapi">Jurnalistik</option>
-              <option value="Fisioterapi">Ilmu Hukum</option>
-              <option value="Fisioterapi">Broadcasting</option>
-              <option value="Fisioterapi">Akutansi</option>
+              <option value="Desain Komunikasi Visual">Desain Komunikasi Visual</option>
+              <option value="Desain Produk">Desain Produk</option>
+              <option value="Humas">Humas</option>
+              <option value="Jurnalistik">Jurnalistik</option>
+              <option value="Ilmu Hukum">Ilmu Hukum</option>
+              <option value="Broadcasting">Broadcasting</option>
+              <option value="Akkutansi ">Akutansi</option>
               <option value="Fisioterapi">Fisioterapi</option>
-              <option value="Fisioterapi">Psikologi</option>
-              <option value="Fisioterapi">Farmasi</option>
+              <option value="Psikologi">Psikologi</option>
+              <option value="Farmasi">Farmasi</option>
             </select>
           </div>
            <button
