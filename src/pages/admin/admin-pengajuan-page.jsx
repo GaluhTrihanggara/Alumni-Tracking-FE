@@ -48,7 +48,11 @@ const SubmissionPage = () => {
         if (responseChanges.ok) {
           const jsonChanges = await responseChanges.json();
           if (Array.isArray(jsonChanges)) {
-            dataChanges = jsonChanges.map((item, index) => ({ ...item, type: "change", key: `change-${index}` }));
+            dataChanges = jsonChanges.map((item, index) => ({
+              ...item,
+              type: "change",
+              key: `change-${index}`,
+            }));
           } else {
             console.error(
               "Expected dataChanges to be an array but got:",
@@ -76,29 +80,37 @@ const SubmissionPage = () => {
           }
         }
 
-         if (responseScraped.ok) {
-      const jsonScraped = await responseScraped.json();
-      console.log("Scraped data from server:", jsonScraped);
-      if (jsonScraped.success && Array.isArray(jsonScraped.data)) {
-        dataScraped = jsonScraped.data.map((item, index) => ({
-          ...item,
-          type: 'scraped',
-          key: `scraped-${index}`,
-          pddiktiInfo: typeof item.pddiktiInfo === 'string' ? JSON.parse(item.pddiktiInfo) : item.pddiktiInfo,
-          linkedInProfile: typeof item.linkedInProfile === 'string' ? JSON.parse(item.linkedInProfile) : item.linkedInProfile
-        }));
-      } else {
-        console.error("Expected jsonScraped.data to be an array but got:", jsonScraped);
-      }
-    } else {
-      console.error("Failed to fetch scraped data");
-    }
+        if (responseScraped.ok) {
+          const jsonScraped = await responseScraped.json();
+          console.log("Scraped data from server:", jsonScraped);
+          if (jsonScraped.success && Array.isArray(jsonScraped.data)) {
+            dataScraped = jsonScraped.data.map((item, index) => ({
+              ...item,
+              type: "scraped",
+              key: `scraped-${index}`,
+              pddiktiInfo:
+                typeof item.pddiktiInfo === "string"
+                  ? JSON.parse(item.pddiktiInfo)
+                  : item.pddiktiInfo,
+              linkedInProfile:
+                typeof item.linkedInProfile === "string"
+                  ? JSON.parse(item.linkedInProfile)
+                  : item.linkedInProfile,
+            }));
+          } else {
+            console.error(
+              "Expected jsonScraped.data to be an array but got:",
+              jsonScraped
+            );
+          }
+        } else {
+          console.error("Failed to fetch scraped data");
+        }
 
-    
         const combinedData = [
           ...dataChanges,
           ...dataKolaborasi,
-          ...dataScraped
+          ...dataScraped,
         ];
 
         console.log("Combined data:", combinedData); // For debugging
@@ -128,8 +140,8 @@ const SubmissionPage = () => {
         url = `http://localhost:3000/api/submission-changes/${id}/approve`;
       } else if (type === "kolaborasi") {
         url = `http://localhost:3000/api/kolaborasi-alumni/${id}/approve`;
-      } else if (type === 'scraped') {
-        url = `http://localhost:3000/api/scrape/${id}/approve`; 
+      } else if (type === "scraped") {
+        url = `http://localhost:3000/api/scrape/${id}/approve`;
       } else {
         throw new Error("Invalid submission type");
       }
@@ -175,8 +187,8 @@ const SubmissionPage = () => {
         url = `http://localhost:3000/api/submission-changes/${id}/reject`;
       } else if (type === "kolaborasi") {
         url = `http://localhost:3000/api/kolaborasi-alumni/${id}/reject`;
-      } else if (type === 'scraped') {
-        url = `http://localhost:3000/api/scrape/${id}/reject`; 
+      } else if (type === "scraped") {
+        url = `http://localhost:3000/api/scrape/${id}/reject`;
       } else {
         throw new Error("Invalid submission type");
       }
@@ -239,6 +251,9 @@ const SubmissionPage = () => {
     return (
       <div className="mt-2 ml-4">
         <p className="mb-2">
+          <strong>Nama:</strong> {kolaborasi.nama}
+        </p>
+        <p className="mb-2">
           <strong>NIM:</strong> {kolaborasi.nomor_induk_mahasiswa}
         </p>
         <p className="mb-2">
@@ -287,23 +302,49 @@ const SubmissionPage = () => {
   };
 
   const renderScrapedDetails = (scraped) => {
-  const pddiktiInfo = typeof scraped.pddiktiInfo === 'string' ? JSON.parse(scraped.pddiktiInfo) : scraped.pddiktiInfo;
-  const linkedInProfile = typeof scraped.linkedInProfile === 'string' ? JSON.parse(scraped.linkedInProfile) : scraped.linkedInProfile;
-  
-  return (
-    <div className="mt-2 ml-4">
-      <p><strong>Nama:</strong> {scraped.name}</p>
-      <p><strong>Universitas:</strong> {pddiktiInfo?.university}</p>
-      <p><strong>Program Studi:</strong> {pddiktiInfo?.alumniData?.program_studi}</p>
-      <p><strong>Jenjang:</strong> {pddiktiInfo?.alumniData?.jenjang}</p>
-      <p><strong>NIM:</strong> {pddiktiInfo?.alumniData?.nomor_induk_mahasiswa}</p>
-      <p><strong>Tahun Masuk:</strong> {pddiktiInfo?.alumniData?.tahun_masuk}</p>
-      <p><strong>Status:</strong> {pddiktiInfo?.alumniData?.status_mahasiswa_saat_ini}</p>
-      <p><strong>Pekerjaan LinkedIn:</strong> {linkedInProfile?.jobTitle}</p>
-      <p><strong>Perusahaan LinkedIn:</strong> {linkedInProfile?.companyName}</p>
-    </div>
-  );
-};
+    const pddiktiInfo =
+      typeof scraped.pddiktiInfo === "string"
+        ? JSON.parse(scraped.pddiktiInfo)
+        : scraped.pddiktiInfo;
+    const linkedInProfile =
+      typeof scraped.linkedInProfile === "string"
+        ? JSON.parse(scraped.linkedInProfile)
+        : scraped.linkedInProfile;
+
+    return (
+      <div className="mt-2 ml-4">
+        <p>
+          <strong>Nama:</strong> {scraped.name}
+        </p>
+        <p>
+          <strong>Universitas:</strong> {pddiktiInfo?.university}
+        </p>
+        <p>
+          <strong>Program Studi:</strong>{" "}
+          {pddiktiInfo?.alumniData?.program_studi}
+        </p>
+        <p>
+          <strong>Jenjang:</strong> {pddiktiInfo?.alumniData?.jenjang}
+        </p>
+        <p>
+          <strong>NIM:</strong> {pddiktiInfo?.alumniData?.nomor_induk_mahasiswa}
+        </p>
+        <p>
+          <strong>Tahun Masuk:</strong> {pddiktiInfo?.alumniData?.tahun_masuk}
+        </p>
+        <p>
+          <strong>Status:</strong>{" "}
+          {pddiktiInfo?.alumniData?.status_mahasiswa_saat_ini}
+        </p>
+        <p>
+          <strong>Pekerjaan LinkedIn:</strong> {linkedInProfile?.jobTitle}
+        </p>
+        <p>
+          <strong>Perusahaan LinkedIn:</strong> {linkedInProfile?.companyName}
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="flex">
@@ -318,29 +359,45 @@ const SubmissionPage = () => {
             submissions.map((submission) => (
               <div key={submission.key} className="mb-6 border-b pb-4">
                 <h2 className="text-xl font-semibold mb-2">
-                  {submission.type === 'change' ? 'Profile Change': 
-                   submission.type === 'kolaborasi' ? 'New Alumni Collaboration':
-                   submission.type === 'scraped' ? 'Scraped Alumni Data':
-                   null}
+                  {submission.type === "change"
+                    ? "Profile Change"
+                    : submission.type === "kolaborasi"
+                    ? "New Alumni Collaboration"
+                    : submission.type === "scraped"
+                    ? "Scraped Alumni Data"
+                    : null}
                 </h2>
                 <div className="grid grid-cols-1 gap-4 mb-4">
                   <div>
-                    <span className="font-semibold">Nama: </span>
+                    <span className="font-semibold">
+                      {submission.type === "kolaborasi"
+                        ? "Diajukan oleh: "
+                        : "Nama: "}
+                    </span>
                     {submission.type === "change"
                       ? submission.Alumni?.nama
-                      : submission.nama || submission.name || "Name not available"}
+                      : submission.type === "kolaborasi"
+                      ? submission.pengaju || "Nama pengaju tidak tersedia"
+                      : submission.type === "scraped"
+                      ? submission.name
+                      : "Name not available"}
                   </div>
                   <div>
                     <span className="font-semibold">Details: </span>
-                    {submission.type === 'change' ? renderChanges(submission.changes) :
-                     submission.type === 'kolaborasi' ? renderKolaborasiDetails(submission) :
-                     submission.type === 'scraped' ? renderScrapedDetails(submission) :
-                     null}
+                    {submission.type === "change"
+                      ? renderChanges(submission.changes)
+                      : submission.type === "kolaborasi"
+                      ? renderKolaborasiDetails(submission)
+                      : submission.type === "scraped"
+                      ? renderScrapedDetails(submission)
+                      : null}
                   </div>
                 </div>
                 <div className="flex space-x-4">
                   <button
-                    onClick={() => handleApprove(submission.id, submission.type)}
+                    onClick={() =>
+                      handleApprove(submission.id, submission.type)
+                    }
                     className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                   >
                     Approve

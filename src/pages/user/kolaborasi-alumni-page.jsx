@@ -166,13 +166,23 @@ const KolaborasiAlumniPage = () => {
   const handleSend = async () => {
     try {
       const token = localStorage.getItem("token");
+      const userData = JSON.parse(localStorage.getItem("user")); // Ambil data user dari localStorage
+    
+    if (!userData || !userData.nama) {
+      throw new Error("Data user tidak tersedia");
+    }
+
+    const dataToSend = {
+      ...formData,
+      pengaju: userData.nama // Gunakan nama user yang login
+    };
       const response = await fetch("http://localhost:3000/api/kolaborasi-alumni/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (response.ok) {
