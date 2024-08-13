@@ -71,6 +71,7 @@ const SubmissionPage = () => {
               type: "kolaborasi",
               key: `kolaborasi-${index}`,
               mediaSosial: item.media_sosial_data || [],
+              nim_pengaju: item.nim_pengaju, // Menambahkan nim_pengaju dari data API
             }));
           } else {
             console.error(
@@ -377,7 +378,7 @@ const SubmissionPage = () => {
                     {submission.type === "change"
                       ? submission.Alumni?.nama
                       : submission.type === "kolaborasi"
-                      ? submission.pengaju || "Nama pengaju tidak tersedia"
+                      ? `${submission.pengaju} (${submission.nim_pengaju})`
                       : submission.type === "scraped"
                       ? submission.name
                       : "Name not available"}

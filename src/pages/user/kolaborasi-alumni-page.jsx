@@ -174,7 +174,8 @@ const KolaborasiAlumniPage = () => {
 
     const dataToSend = {
       ...formData,
-      pengaju: userData.nama // Gunakan nama user yang login
+      pengaju: userData.nama, // Gunakan nama user yang login
+      nim_pengaju:userData.nomor_induk_mahasiswa
     };
       const response = await fetch("http://localhost:3000/api/kolaborasi-alumni/submit", {
         method: "POST",
