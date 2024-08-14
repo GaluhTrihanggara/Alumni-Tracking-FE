@@ -117,17 +117,28 @@ function AdminSearchAlumniPage() {
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    const filters = {};
-    if (isYearFilterEnabled) {
-      filters.fromYear = fromYear;
-      filters.toYear = toYear;
-    }
-    if (isProgramFilterEnabled) {
-      filters.programStudi = selectedProgram;
-    }
-    fetchAlumni(searchQuery, filters);
-  };
+  e.preventDefault();
+  
+  // Initialize an empty filters object
+  const filters = {};
+
+  // Check if the year filter is enabled and both years are provided
+  if (isYearFilterEnabled && fromYear && toYear) {
+    filters.fromYear = fromYear;
+    filters.toYear = toYear;
+  }
+
+  // Check if the program filter is enabled and a program is selected
+  if (isProgramFilterEnabled && selectedProgram) {
+    filters.programStudi = selectedProgram;
+  }
+
+  console.log("Applying filters:", filters); // Debug log
+
+  // Fetch alumni data based on the search query and the applied filters
+  fetchAlumni(searchQuery, filters);
+};
+
 
   const handleSuggestionClick = (name) => {
     setSearchQuery(name);
