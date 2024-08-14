@@ -184,8 +184,8 @@ const AlumniPage = () => {
 const InfoField = ({ label, value, type = "text" }) => (
   <div className="mb-4">
     <div className="text-sm font-medium text-gray-500">{label}</div>
-    <div className={`mt-1 ${type === "password" ? "text-sm text-gray-900" : "text-gray-900"}`}>
-      {type === "password" ? "••••••••" : value}
+    <div className={`mt-1 ${type === "" ? "text-sm text-gray-900" : "text-gray-900"}`}>
+      {type === "" ? "" : value}
     </div>
   </div>
 );

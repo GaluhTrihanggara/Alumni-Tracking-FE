@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import profileImage from "../../assets/user.jpg";
+import { Linkedin, Twitter, Facebook, Instagram, Globe } from 'lucide-react';
 import logo1 from "../../assets/alumni_tracking1.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -31,7 +32,7 @@ const AlumniPageAdmin = () => {
   const navigate = useNavigate();
 
   // Fetch alumni data if not provided via location state
-     const fetchAlumniData = useCallback(async () => {
+  const fetchAlumniData = useCallback(async () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
@@ -265,6 +266,35 @@ const AlumniPageAdmin = () => {
     return <div>No alumni data found.</div>;
   }
 
+  const SocialIcon = ({ platform, link }) => {
+    const iconProps = { size: 24, className: "text-blue-500 hover:text-blue-700" };
+    const iconElement = (() => {
+      switch (platform.toLowerCase()) {
+        case 'linkedin':
+          return <Linkedin {...iconProps} />;
+        case 'twitter':
+          return <Twitter {...iconProps} />;
+        case 'facebook':
+          return <Facebook {...iconProps} />;
+        case 'instagram':
+          return <Instagram {...iconProps} />;
+        default:
+          return <Globe {...iconProps} />;
+      }
+    })();
+
+    return (
+      <a href={link} target="_blank" rel="noopener noreferrer" className="mr-2">
+        {iconElement}
+      </a>
+    );
+  };
+
+  SocialIcon.propTypes = {
+    platform: PropTypes.string.isRequired,
+    link: PropTypes.string,
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <ToastContainer />
@@ -340,13 +370,13 @@ const AlumniPageAdmin = () => {
                   Change Password
                 </a>
                 <a
-                href="#"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                role="menuitem"
-                onClick={handelScrappingAlumni}
-              >
-                Scrapping Alumni
-              </a>
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handelScrappingAlumni}
+                >
+                  Scrapping Alumni
+                </a>
                 <a
                   href="#"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -560,23 +590,20 @@ const AlumniPageAdmin = () => {
                     </button>
                   </div>
                 ) : (
-                  <div>
+                  <div className="flex items-center">
                     {alumniData.Media_Sosial_Alumnis &&
                     alumniData.Media_Sosial_Alumnis.length > 0 ? (
                       alumniData.Media_Sosial_Alumnis.map((media, index) => (
-                        <div key={index} className="mt-2">
-                          <p>
-                            {media.Media_Sosial?.name || "Unknown Platform"}:{" "}
-                            <a
-                              href={media.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800"
-                            >
-                              {media.link}
-                            </a>
-                          </p>
-                        </div>
+                        <a
+                          key={index}
+                          href={media.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={media.Media_Sosial?.name || "Social Media"}
+                          className="mr-2"
+                        >
+                          <SocialIcon platform={media.Media_Sosial?.name} link={media.link} />
+                        </a>
                       ))
                     ) : (
                       <p>Belum ada media sosial yang ditambahkan</p>
