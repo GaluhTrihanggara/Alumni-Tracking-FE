@@ -13,7 +13,11 @@ import 'react-toastify/dist/ReactToastify.css';
 function AlumniSearchPage() {
   const menuRef = useRef(null);
   const profileRef = useRef(null);
+  const searchRef = useRef(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [alumni, setAlumni] = useState([]);
   const [isProgramFilterEnabled, setIsProgramFilterEnabled] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState("");
@@ -22,15 +26,16 @@ function AlumniSearchPage() {
   const [toYear, setToYear] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchRef = useRef(null);
+  const lastToastTime = useRef(0);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target) &&
-          profileRef.current && !profileRef.current.contains(event.target)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
         setIsMenuOpen(false);
       }
     }
@@ -41,24 +46,23 @@ function AlumniSearchPage() {
   }, []);
 
   useEffect(() => {
-  function handleClickOutside(event) {
-    if (searchRef.current && !searchRef.current.contains(event.target)) {
-      setShowSuggestions(false);
-    }
-  }
-
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
-
-  useEffect(() => {
     const profileElement = profileRef.current;
     if (profileElement) {
       profileElement.addEventListener('click', toggleMenu);
       return () => profileElement.removeEventListener('click', toggleMenu);
     }
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -71,70 +75,90 @@ function AlumniSearchPage() {
   }, [location.search]);
 
   const fetchAlumni = async (query, filters = {}) => {
-  try {
-    const token = localStorage.getItem('token');
-    let url = `http://localhost:3000/api/alumni/search?query=${encodeURIComponent(query)}`;
-    
-    if (filters.fromYear) url += `&fromYear=${filters.fromYear}`;
-    if (filters.toYear) url += `&toYear=${filters.toYear}`;
-    if (filters.programStudi) url += `&programStudi=${encodeURIComponent(filters.programStudi)}`;
+    try {
+      const token = localStorage.getItem('token');
+      let url = `http://localhost:3000/api/alumni/search?query=${encodeURIComponent(query)}`;
 
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+      if (filters.fromYear) url += `&fromYear=${filters.fromYear}`;
+      if (filters.toYear) url += `&toYear=${filters.toYear}`;
+      if (filters.programStudi) url += `&programStudi=${encodeURIComponent(filters.programStudi)}`;
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAlumni(data);
+        setSuggestions(data);
+      } else {
+        console.error('Failed to fetch alumni');
       }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      setAlumni(data);
-      setSuggestions(data);
-    } else {
-      console.error('Failed to fetch alumni');
+    } catch (error) {
+      console.error('Error fetching alumni:', error);
     }
-  } catch (error) {
-    console.error('Error fetching alumni:', error);
-  }
-};
+  };
 
   const handleSearchChange = (e) => {
-  const value = e.target.value;
-  setSearchQuery(value);
-  if (value) {
-    fetchAlumni(value);
-    setShowSuggestions(true);
-  } else {
-    setSuggestions([]);
-    setShowSuggestions(false);
-  }
-};
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (value) {
+      fetchAlumni(value);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    
+    const filters = {};
+
+    if (isYearFilterEnabled && fromYear && toYear) {
+      filters.fromYear = fromYear;
+      filters.toYear = toYear;
+    }
+
+    if (isProgramFilterEnabled && selectedProgram) {
+      filters.programStudi = selectedProgram;
+    }
+
+    console.log("Applying filters:", filters); // Debug log
+
+    fetchAlumni(searchQuery, filters);
   };
 
   const handleSuggestionClick = (name) => {
-  setSearchQuery(name);
-  setShowSuggestions(false);
-  navigate(`/search?q=${encodeURIComponent(name)}`);
-};
+    setSearchQuery(name);
+    setShowSuggestions(false);
+    navigate(`/search?q=${encodeURIComponent(name)}`);
+  };
 
   const toggleMenu = (e) => {
     if (e) e.stopPropagation();
-    setIsMenuOpen(prevState => !prevState);
+    setIsMenuOpen((prevState) => !prevState);
   };
 
   const handleBellClick = () => {
-    toast.info('Data alumni sudah terbaru tanggal 12 Februari 2024', {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    const now = Date.now();
+    const timeSinceLastToast = now - lastToastTime.current;
+
+    if (timeSinceLastToast >= 3000) {
+      toast.info('Data alumni sudah terbaru tanggal 12 Februari 2024', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      lastToastTime.current = now;
+    }
   };
 
   const handleLogout = () => {
@@ -167,8 +191,13 @@ function AlumniSearchPage() {
   };
 
   const handleAlumniClick = (alumni) => {
-    const nameSlug = alumni.nama.toLowerCase().replace(/ /g, '-');
-    navigate(`/alumni/${nameSlug}`, { state: { alumniData: alumni } });
+    if (alumni && alumni.nama) {
+      const nameSlug = alumni.nama.toLowerCase().replace(/ /g, '-');
+      navigate(`/alumni/${nameSlug}`, { state: { alumniData: alumni } });
+    } else {
+      console.error("Data alumni tidak valid:", alumni);
+      toast.error("Terjadi kesalahan saat membuka profil alumni");
+    }
   };
 
   return (
@@ -192,7 +221,10 @@ function AlumniSearchPage() {
                 onChange={handleSearchChange}
                 onFocus={() => setShowSuggestions(true)}
               />
-              <button type="submit" className="absolute left-3 top-2 text-gray-400">
+              <button
+                type="submit"
+                className="absolute left-3 top-2 text-gray-400"
+              >
                 <Search size={20} />
               </button>
             </div>
@@ -213,39 +245,84 @@ function AlumniSearchPage() {
           </form>
         </div>
         <div className="flex items-center">
-          <Bell 
-            className="text-white mr-6 cursor-pointer" 
-            size={24} 
+          <Bell
+            className="text-white mr-6 cursor-pointer"
+            size={24}
             onClick={handleBellClick}
           />
-          <div 
+          <div
             ref={profileRef}
             className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"
             onClick={toggleMenu}
-            style={{ border: '2px solid white', position: 'relative', zIndex: 1000 }}
+            style={{
+              border: '2px solid white',
+              position: 'relative',
+              zIndex: 1000,
+            }}
           >
-            <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+            <img
+              src={profileImage}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
           </div>
           {isMenuOpen && (
-            <div ref={menuRef} className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            <div
+              ref={menuRef}
+              className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu"
+            >
+              <div
+                className="py-1"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="options-menu"
+              >
                 <div className="px-4 py-2 text-sm text-gray-700 border-b flex items-center">
-                  <img src={profileImage} alt="Profile" className="w-10 h-10 rounded-full mr-2" />
+                  <img
+                    src={profileImage}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full mr-2"
+                  />
                   <span>Profile Name</span>
                 </div>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleProfile}
+                >
                   Profile
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleKolaborasiAlumni}> 
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleKolaborasiAlumni}
+                >
                   Kolaborasi Alumni
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleChangePassword}
+                >
                   Change Password
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handlePrivacyPolicy}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handlePrivacyPolicy}
+                >
                   Privacy Policy
                 </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleLogout}>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={handleLogout}
+                >
                   Logout
                 </a>
               </div>
@@ -267,7 +344,9 @@ function AlumniSearchPage() {
                   control={
                     <Switch
                       checked={isYearFilterEnabled}
-                      onChange={() => setIsYearFilterEnabled(!isYearFilterEnabled)}
+                      onChange={() =>
+                        setIsYearFilterEnabled(!isYearFilterEnabled)
+                      }
                     />
                   }
                 />
@@ -302,7 +381,9 @@ function AlumniSearchPage() {
                   control={
                     <Switch
                       checked={isProgramFilterEnabled}
-                      onChange={() => setIsProgramFilterEnabled(!isProgramFilterEnabled)}
+                      onChange={() =>
+                        setIsProgramFilterEnabled(!isProgramFilterEnabled)
+                      }
                     />
                   }
                 />
@@ -317,11 +398,24 @@ function AlumniSearchPage() {
               <option value="">Pilih Program Studi</option>
               <option value="Teknik Informatika">Teknik Informatika</option>
               <option value="Sistem Informasi">Sistem Informasi</option>
-              <option value="Manajemen">Manajemen</option>
+              <option value="Desain Komunikasi Visual">Desain Komunikasi Visual</option>
+              <option value="Desain Produk">Desain Produk</option>
+              <option value="Humas">Humas</option>
+              <option value="Jurnalistik">Jurnalistik</option>
               <option value="Ilmu Hukum">Ilmu Hukum</option>
+              <option value="Broadcasting">Broadcasting</option>
+              <option value="Akkutansi ">Akutansi</option>
               <option value="Fisioterapi">Fisioterapi</option>
+              <option value="Psikologi">Psikologi</option>
+              <option value="Farmasi">Farmasi</option>
             </select>
           </div>
+          <button
+            className="mt-4 bg-blue-500 text-white p-2 rounded-md w-full"
+            onClick={handleSearchSubmit}
+          >
+            Terapkan Filter
+          </button>
         </aside>
 
         <section className="flex-grow p-4">
