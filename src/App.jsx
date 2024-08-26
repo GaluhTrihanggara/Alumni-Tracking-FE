@@ -18,6 +18,9 @@ import ProfileAdmin from "./pages/admin/profile-admin";
 import AdminPrivacyPolicy from "./pages/admin/admin-privacy-page";
 import AdminSubmission from "./pages/admin/admin-pengajuan-page";
 import AdminScrapping from "./pages/admin/admin-scrapping-data";
+import AdminContactAlumni from "./pages/admin/admin-kontak-alumni-page";
+import GrafikPekerjaanAlumni from "./pages/admin/admin-grafik-pekerjaan-alumni-page";
+import GajiAlumni from "./pages/admin/admin-gaji-alumni-page";
 
 function App() {
   return (
@@ -43,6 +46,9 @@ function App() {
           <Route path="/privacy-policy" element={<AdminPrivacyPolicy />} />
           <Route path="/admin-submission" element={<AdminSubmission />} />
           <Route path="/admin-scrapping" element={<AdminScrapping />} />
+          <Route path="/contact-alumni" element={<AdminContactAlumni />} />
+          <Route path="/grafik-pekerjaan-alumni" element={<GrafikPekerjaanAlumni />} />
+          <Route path="/gaji-alumni" element={<GajiAlumni />} />
         </Routes>
       </BrowserRouter>
     </div>

@@ -118,6 +118,12 @@ function BerandaAdmin() {
     navigate("/admin-submission");
   };
 
+  const handleContactAlumni = (e) => {
+    e.preventDefault();
+    setNewSubmissionsCount(0);
+    navigate("/contact-alumni");
+  };
+
   const handlePrivacyPolicy = (e) => {
     e.preventDefault();
     navigate("/privacy_policy");
@@ -270,6 +276,14 @@ function BerandaAdmin() {
                 onClick={handleSubmission}
               >
                 Submissions
+              </a>
+              <a
+                href="#"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                role="menuitem"
+                onClick={handleContactAlumni}
+              >
+                Contact Alumni
               </a>
               <a
                 href="#"

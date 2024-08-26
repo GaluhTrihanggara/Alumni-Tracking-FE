@@ -101,7 +101,7 @@ const ChangePasswordPage = () => {
         <div className="bg-white shadow-md rounded-lg p-6">
           {isEditing ? (
             <>
-              <h2 className="text-xl font-semibold mb-4">Update Your Password</h2>
+
               <form onSubmit={handleChangePassword}>
                 <div className="grid grid-cols-1 gap-4">
                   <div>

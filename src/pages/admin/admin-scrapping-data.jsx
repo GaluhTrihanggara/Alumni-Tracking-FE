@@ -163,7 +163,7 @@ const ScrappingPage = () => {
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label htmlFor="namaAlumni" className="block text-gray-700 text-sm font-bold mb-2">
-                Nama Alumni (pisahkan dengan koma)
+                Nama Alumni
               </label>
               <input
                 type="text"

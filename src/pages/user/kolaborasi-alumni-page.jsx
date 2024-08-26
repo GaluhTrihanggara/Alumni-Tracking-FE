@@ -231,175 +231,177 @@ const KolaborasiAlumniPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <ToastContainer/>
-      <header className="bg-blue-500 p-4 flex justify-between items-center">
-        <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
-          <img src={logo1} alt="Alumni Tracking Logo" className="h-8 mr-2" />
+  <div className="min-h-screen bg-gray-100">
+    <ToastContainer/>
+    <header className="bg-blue-500 p-4 flex justify-between items-center">
+      <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
+        <img src={logo1} alt="Alumni Tracking Logo" className="h-8 mr-2" />
+      </div>
+      <div className="flex items-center">
+        <Bell 
+          className="text-white mr-6 cursor-pointer" 
+          size={24} 
+          onClick={handleBellClick}
+        />
+        <div 
+          ref={profileRef}
+          className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"
+          onClick={toggleMenu}
+          style={{ border: '2px solid white', position: 'relative', zIndex: 1000 }}
+        >
+          <img src={profileImage} alt="User Profile" className="w-full h-full object-cover" />
         </div>
-        <div className="flex items-center">
-          <Bell 
-            className="text-white mr-6 cursor-pointer" 
-            size={24} 
-            onClick={handleBellClick}
-          />
-          <div 
-            ref={profileRef}
-            className="profile-circle cursor-pointer w-10 h-10 rounded-full flex items-center justify-center overflow-hidden mr-2"
-            onClick={toggleMenu}
-            style={{ border: '2px solid white', position: 'relative', zIndex: 1000 }}
-          >
-            <img src={profileImage} alt="User Profile" className="w-full h-full object-cover" />
+        {isMenuOpen && (
+          <div ref={menuRef} className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu">
+            <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>Profile</a>
+              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>Change Password</a>
+              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handlePrivacyPolicy}>Privacy Policy</a>
+              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleLogout}>Logout</a>
+            </div>
           </div>
-          {isMenuOpen && (
-            <div ref={menuRef} className="absolute right-10 top-6 mt-10 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dropdown-menu">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleProfile}>Profile</a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleChangePassword}>Change Password</a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handlePrivacyPolicy}>Privacy Policy</a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={handleLogout}>Logout</a>
-              </div>
-            </div>
-          )}
-        </div>
-      </header>
+        )}
+      </div>
+    </header>
 
-      <main className="container mx-auto mt-12 p-3">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-6xl mx-auto">
-          <div className="bg-blue-600 p-4 text-white text-lg font-semibold">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <User className="w-7 h-8 mr-2" />
-                Data Kolaborasi Alumni
-              </div>
+    <main className="container mx-auto mt-12 p-3">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-6xl mx-auto">
+        <div className="bg-blue-600 p-4 text-white text-lg font-semibold">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <User className="w-7 h-8 mr-2" />
+              Data Kolaborasi Alumni
             </div>
-            <div className="flex justify-center">
-              {!isEditMode ? (
-                <button onClick={handleEdit} className="bg-white text-blue-600 px-4 py-2 rounded-md flex items-center">
-                  <Edit className="mr-2" size={18} />
-                  Edit
+          </div>
+          <div className="flex justify-center">
+            {!isEditMode ? (
+              <button onClick={handleEdit} className="bg-white text-blue-600 px-4 py-2 rounded-md flex items-center">
+                <Edit className="mr-2" size={18} />
+                Edit
+              </button>
+            ) : (
+              <div className="flex space-x-4">
+                <button onClick={handleSend} className="bg-green-500 text-white px-4 py-2 rounded-md flex items-center">
+                  <Send className="mr-2" size={18} />
+                  Kirim
                 </button>
-              ) : (
-                <div className="flex space-x-4">
-                  <button onClick={handleSend} className="bg-green-500 text-white px-4 py-2 rounded-md flex items-center">
-                    <Send className="mr-2" size={18} />
-                    Kirim
-                  </button>
-                  <button onClick={handleCancel} className="bg-red-500 text-white px-4 py-2 rounded-md flex items-center">
-                    <X className="mr-2" size={18} />
-                    Batal
-                  </button>
-                </div>
-              )}
+                <button onClick={handleCancel} className="bg-red-500 text-white px-4 py-2 rounded-md flex items-center">
+                  <X className="mr-2" size={18} />
+                  Batal
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="md:col-span-1">
+            <div className="bg-gray-300 w-40 h-40 flex items-center justify-center mx-auto mt-10 shadow-md">
+              <User className="w-24 h-24 text-gray-700" />
             </div>
           </div>
 
-          <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div className="md:col-span-1">
-              <div className="bg-gray-300 w-40 h-40 flex items-center justify-center mx-auto mt-10 shadow-md">
-                <User className="w-24 h-24 text-gray-700" />
-              </div>
-            </div>
-
-            <div className="col-span-2 grid grid-cols-2 gap-4">
-              <InfoField label="Nama" value={formData.nama} name="nama" isEditMode={isEditMode} onChange={handleInputChange} />
-              <InfoField label="Nomor Induk Mahasiswa" value={formData.nomor_induk_mahasiswa} name="nomor_induk_mahasiswa" isEditMode={isEditMode} onChange={handleInputChange} />
-              <InfoField 
-                label="Program Studi" 
-                value={formData.program_studi_id} 
-                name="program_studi_id" 
-                isEditMode={isEditMode} 
-                onChange={handleInputChange}
-                options={programStudis.map(ps => ({ value: ps.id, label: ps.name }))}
-              />
-              <InfoField label="Kontak Telephone" value={formData.kontak_telephone} name="kontak_telephone" isEditMode={isEditMode} onChange={handleInputChange} />
-              <InfoField 
-                label="Jenis Kelamin" 
-                value={formData.jenis_kelamin} 
-                name="jenis_kelamin" 
-                isEditMode={isEditMode} 
-                onChange={handleInputChange}
-                options={[
-                  { value: "laki-laki", label: "Laki-laki" },
-                  { value: "perempuan", label: "Perempuan" }
-                ]}
-              />
-              <InfoField label="Perguruan Tinggi" value={formData.perguruan_tinggi} name="perguruan_tinggi" isEditMode={isEditMode} onChange={handleInputChange} />
-              <InfoField 
-                label="Jenjang" 
-                value={formData.jenjang} 
-                name="jenjang" 
-                isEditMode={isEditMode} 
-                onChange={handleInputChange}
-                options={[
-                  { value: "Sarjana", label: "Sarjana" },
-                  { value: "Magister", label: "Magister" },
-                  { value: "Doktor", label: "Doktor" },
-                  { value: "Diploma-1", label: "Diploma-1" },
-                  { value: "Diploma-2", label: "Diploma-2" },
-                  { value: "Diploma-3", label: "Diploma-3" },
-                  { value: "Diploma-4", label: "Diploma-4" },
-                ]}
-              />
-              <InfoField 
-                label="Tahun Masuk" 
-                value={formData.tahun_masuk} 
-                name="tahun_masuk" 
-                isEditMode={isEditMode} 
-                onChange={handleInputChange}
-                options={Array.from({ length: 2030 - 1999 }, (_, i) => ({ value: (2030 - i).toString(), label: (2030 - i).toString() }))}
-              />
-              <InfoField label="Status Mahasiswa Saat Ini" value={formData.status_mahasiswa_saat_ini} name="status_mahasiswa_saat_ini" isEditMode={isEditMode} onChange={handleInputChange} />
-              <InfoField label="Pekerjaan Saat Ini" value={formData.pekerjaan_saat_ini} name="pekerjaan_saat_ini" isEditMode={isEditMode} onChange={handleInputChange} />
+          <div className="col-span-2 grid grid-cols-2 gap-4">
+            <InfoField label="Nama" value={formData.nama} name="nama" isEditMode={isEditMode} onChange={handleInputChange} />
+            <InfoField label="Nomor Induk Mahasiswa" value={formData.nomor_induk_mahasiswa} name="nomor_induk_mahasiswa" isEditMode={isEditMode} onChange={handleInputChange} />
+            <InfoField 
+              label="Program Studi" 
+              value={formData.program_studi_id} 
+              name="program_studi_id" 
+              isEditMode={isEditMode} 
+              onChange={handleInputChange}
+              options={programStudis.map(ps => ({ value: ps.id, label: ps.name }))}
+            />
+            <InfoField label="Kontak Telephone" value={formData.kontak_telephone} name="kontak_telephone" isEditMode={isEditMode} onChange={handleInputChange} />
+            <InfoField 
+              label="Jenis Kelamin" 
+              value={formData.jenis_kelamin} 
+              name="jenis_kelamin" 
+              isEditMode={isEditMode} 
+              onChange={handleInputChange}
+              options={[
+                { value: "laki-laki", label: "Laki-laki" },
+                { value: "perempuan", label: "Perempuan" }
+              ]}
+            />
+            <InfoField label="Perguruan Tinggi" value={formData.perguruan_tinggi} name="perguruan_tinggi" isEditMode={isEditMode} onChange={handleInputChange} />
+            <InfoField 
+              label="Jenjang" 
+              value={formData.jenjang} 
+              name="jenjang" 
+              isEditMode={isEditMode} 
+              onChange={handleInputChange}
+              options={[
+                { value: "Sarjana", label: "Sarjana" },
+                { value: "Magister", label: "Magister" },
+                { value: "Doktor", label: "Doktor" },
+                { value: "Diploma-1", label: "Diploma-1" },
+                { value: "Diploma-2", label: "Diploma-2" },
+                { value: "Diploma-3", label: "Diploma-3" },
+                { value: "Diploma-4", label: "Diploma-4" },
+              ]}
+            />
+            <InfoField 
+              label="Tahun Masuk" 
+              value={formData.tahun_masuk} 
+              name="tahun_masuk" 
+              isEditMode={isEditMode} 
+              onChange={handleInputChange}
+              options={Array.from({ length: 2030 - 1999 }, (_, i) => ({ value: (2030 - i).toString(), label: (2030 - i).toString() }))}
+            />
+            <InfoField label="Status Mahasiswa Saat Ini" value={formData.status_mahasiswa_saat_ini} name="status_mahasiswa_saat_ini" isEditMode={isEditMode} onChange={handleInputChange} />
+            <InfoField label="Pekerjaan Saat Ini" value={formData.pekerjaan_saat_ini} name="pekerjaan_saat_ini" isEditMode={isEditMode} onChange={handleInputChange} />
+            <div className="col-span-2 grid grid-cols-2 gap-4 items-start">
               <InfoField label="Nama Perusahaan" value={formData.nama_perusahaan} name="nama_perusahaan" isEditMode={isEditMode} onChange={handleInputChange} />
-              {isEditMode && (
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Media Sosial</label>
-                  {formData.mediaSosial.map((media, index) => (
-                    <div key={index} className="flex space-x-2 mt-2">
-                      <select
-                        value={media.media_sosial_id}
-                        onChange={(e) => handleMediaSosialChange(index, "media_sosial_id", e.target.value)}
-                        className="mt-1 block w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                      >
-                        <option value="">Pilih Platform</option>
-                        {mediaSosialPlatforms.map((platform) => (
-                          <option key={platform.id} value={platform.id}>
-                            {platform.name}
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        type="text"
-                        value={media.link}
-                        onChange={(e) => handleMediaSosialChange(index, "link", e.target.value)}
-                        placeholder="Link Media Sosial"
-                        className="mt-1 block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeMediaSosial(index)}
-                        className="mt-1 px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                      >
-                        Hapus
-                      </button>
-                    </div>
-                  ))}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Media Sosial</label>
+                {isEditMode && (
                   <button
                     type="button"
                     onClick={addMediaSosial}
-                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
                   >
                     Tambah Media Sosial
                   </button>
-                </div>
-              )}
+                )}
+                {isEditMode && formData.mediaSosial.map((media, index) => (
+                  <div key={index} className="space-y-2 mt-2">
+                    <select
+                      value={media.media_sosial_id}
+                      onChange={(e) => handleMediaSosialChange(index, "media_sosial_id", e.target.value)}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    >
+                      <option value="">Pilih Platform</option>
+                      {mediaSosialPlatforms.map((platform) => (
+                        <option key={platform.id} value={platform.id}>
+                          {platform.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      value={media.link}
+                      onChange={(e) => handleMediaSosialChange(index, "link", e.target.value)}
+                      placeholder="Link Media Sosial"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeMediaSosial(index)}
+                      className="px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </main>
-    </div>
-  );
+      </div>
+    </main>
+  </div>
+);
 };
 
 const InfoField = ({ label, value, name, isEditMode, onChange, options }) => (

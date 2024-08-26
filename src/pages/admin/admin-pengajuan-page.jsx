@@ -317,6 +317,7 @@ const SubmissionPage = () => {
         <div><strong>Program Studi:</strong> {pddiktiInfo?.alumniData?.program_studi}</div>
         <div><strong>Jenjang:</strong> {pddiktiInfo?.alumniData?.jenjang}</div>
         <div><strong>NIM:</strong> {pddiktiInfo?.alumniData?.nomor_induk_mahasiswa}</div>
+        <div><strong>Jenis Kelamin:</strong> {pddiktiInfo?.alumniData?.jenis_kelamin}</div>
         <div><strong>Tahun Masuk:</strong> {pddiktiInfo?.alumniData?.tahun_masuk}</div>
         <div><strong>Status:</strong> {pddiktiInfo?.alumniData?.status_mahasiswa_saat_ini}</div>
         <div><strong>Pekerjaan LinkedIn:</strong> {linkedInProfile?.jobTitle}</div>

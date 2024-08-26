@@ -10,7 +10,7 @@ const ProfilePage = () => {
   const [mediaSosialPlatforms, setMediaSosialPlatforms] = useState([]);
   const [tempMediaSosial, setTempMediaSosial] = useState([]);
   const [originalProfile, setOriginalProfile] = useState(null);
-  
+
   useEffect(() => {
     fetchProfile();
     fetchProgramStudis();
@@ -103,55 +103,66 @@ const ProfilePage = () => {
     setTempMediaSosial(updatedMediaSosial);
   };
 
+  const formatRupiah = (angka) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+  };
+
+  const parseRupiah = (str) => {
+    return parseInt(str.replace(/[^,\d]/g, ''), 10);
+  };
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const token = localStorage.getItem("token");
-     // Create an object to hold the modified data
-    const changes = {};
-    for (const key in profile) {
-      if (profile[key] !== originalProfile[key]) {
-        changes[key] = profile[key];
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      
+      // Parse gaji pertama before submitting
+      profile.gaji_pertama = parseRupiah(profile.gaji_pertama);
+
+      // Create an object to hold the modified data
+      const changes = {};
+      for (const key in profile) {
+        if (profile[key] !== originalProfile[key]) {
+          changes[key] = profile[key];
+        }
       }
-    }
-    
-    // Tambahkan perubahan media sosial
-    if (JSON.stringify(tempMediaSosial) !== JSON.stringify(originalProfile.Media_Sosial_Alumnis)) {
-      changes.Media_Sosial_Alumnis = tempMediaSosial;
-    }
-    
-    const response = await fetch("http://localhost:3000/api/auth/submit-profile-changes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-       body: JSON.stringify({ changes }),
-    });
 
-    const data = await response.json();
+      // Tambahkan perubahan media sosial
+      if (JSON.stringify(tempMediaSosial) !== JSON.stringify(originalProfile.Media_Sosial_Alumnis)) {
+        changes.Media_Sosial_Alumnis = tempMediaSosial;
+      }
 
-    if (response.ok) {
-      toast.success("Data perubahan profile berhasil diajukan untuk persetujuan admin", {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
+      const response = await fetch("http://localhost:3000/api/auth/submit-profile-changes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ changes }),
       });
-      setIsEditing(false);
-    } else {
-      console.error("Failed to submit profile changes:", data);
-      toast.error("Gagal mengajukan perubahan profile");
-    }
-  } catch (error) {
-    console.error("Error submitting profile changes:", error);
-    toast.error("Terjadi kesalahan saat mengajukan perubahan profile");
-  }
-};
 
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Data perubahan profile berhasil diajukan untuk persetujuan admin", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        setIsEditing(false);
+      } else {
+        console.error("Failed to submit profile changes:", data);
+        toast.error("Gagal mengajukan perubahan profile");
+      }
+    } catch (error) {
+      console.error("Error submitting profile changes:", error);
+      toast.error("Terjadi kesalahan saat mengajukan perubahan profile");
+    }
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -352,6 +363,37 @@ const ProfilePage = () => {
                     />
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Lama Menunggu Pekerjaan
+                    </label>
+                    <input
+                      type="text"
+                      name="lama_menunggu_pekerjaan"
+                      value={profile.lama_menunggu_pekerjaan}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Gaji Pertama
+                    </label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center">
+                      Rp
+                      </span>
+                      <input
+                        type="text"
+                        name="gaji_pertama"
+                        value={profile.gaji_pertama}
+                        onChange={handleChange}
+                        className="pl-8 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700">
                     Media Sosial
@@ -500,6 +542,20 @@ const ProfilePage = () => {
                     Nama Perusahaan
                   </label>
                   <p>{profile.nama_perusahaan}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Lama Menunggu Pekerjaan
+                  </label>
+                  <p>{profile.lama_menunggu_pekerjaan} Bulan</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Gaji Pertama
+                  </label>
+                  <p>{formatRupiah(profile.gaji_pertama)}</p>
                 </div>
               </div>
               <div className="mt-5">

@@ -142,7 +142,7 @@ export default function SignupForm() {
           <div className="text-center text-2xl text-[#2e2e2e]">
             Doesn’t have account yet?{" "}
             <span className="text-2xl font-semibold text-[rgba(6,_1,_255,_0.6)]">
-              <Link to="/">Login</Link>
+              <Link to="/login-admin">Login</Link>
             </span>
           </div>
         </div>
